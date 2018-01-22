@@ -34,7 +34,7 @@ class App extends Component {
               <div className="col-2 bg-dark btn-group" style={{marginTop: '7vh', height: '93vh'}}>
                   <div className="nav flex-column btn-block mt-2">
                       <Button outline color="primary" onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
-                      <Button outline color="primary" className="mt-1" onClick={this.manageDisplay.bind(this, 'upload')}>Upload File</Button>
+                      <Button outline color="primary" className="mt-1" onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
                   </div>
               </div>
               <div className="col-9" style={{display: this.state.displayUpload ? '' : 'none'}}>

@@ -14,7 +14,15 @@ class UploadFile extends Component {
     }
 
     uploadFiles(files) {
+        let totalSize = 0;
+        files.map(f =>
+            totalSize = totalSize + f.size
+        );
+        console.log(totalSize);
         console.log(files);
+        if (totalSize > 204800) {
+            return false;
+        }
         this.setState({
             files: files
         });
@@ -68,18 +76,20 @@ class UploadFile extends Component {
                 <br/>
                 <div>
                     <div className="row">
-                        <div className="col-4 float-left">
-                            <Dropzone
+                        <div className="col-4 float-left" align="left">
+                            <Dropzone style={{cursor: 'pointer'}}
                                 accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
                                 <div>
-                                    <Button className="btn-sm mt-lg-5" outline color="primary">Click or Drag A File Here...</Button>
+                                    <Button className="btn-sm mt-lg-5" outline color="primary">Click or Drag Files Here...</Button>
                                 </div>
                             </Dropzone>
                         </div>
-                        <div className="col-5">
+                    </div>
+                    <div className="row mt-3">
+                        <div className="col-4 float-left" align="left">
                             <ul>
                                 {
-                                    this.state.files.map(f => <Badge key={f.name} className="badge-dark btn-block">{f.name}</Badge>)
+                                    this.state.files.map(f => <Badge key={f.name} className="badge-dark btn-block" style={{marginLeft: -40}}>{f.name} - {f.size}</Badge>)
                                 }
                             </ul>
                         </div>
