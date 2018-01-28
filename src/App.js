@@ -7,6 +7,7 @@ class App extends Component {
 
     constructor(props) {
         super(props);
+        console.log(process.env.NODE_ENV);
         this.state ={
             displayReport: true,
             displayUpload: false
