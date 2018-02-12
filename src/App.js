@@ -7,10 +7,9 @@ class App extends Component {
 
     constructor(props) {
         super(props);
-        console.log(process.env.NODE_ENV);
         this.state ={
-            displayReport: true,
-            displayUpload: false
+            displayReport: false,
+            displayUpload: true
         }
     }
 
@@ -26,7 +25,7 @@ class App extends Component {
     return (
       <div className="App container-fluid">
           <div className="row">
-              <nav className="navbar navbar-dark bg-dark fixed-top"  style={{height: '6vh'}}>
+              <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
                   <h4><Badge color="light">Integracaodeforcas</Badge></h4>
                   <Button size="sm" outline color="warning">Log Out</Button>
               </nav>
@@ -34,8 +33,8 @@ class App extends Component {
           <div className="row">
               <div className="col-2 bg-dark btn-group" style={{marginTop: '7vh', height: '93vh'}}>
                   <div className="nav flex-column btn-block mt-2">
-                      <Button outline color="primary" onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
-                      <Button outline color="primary" className="mt-1" onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
+                      <Button outline color="warning" className="mt-1" onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
+                      <Button outline color="warning" onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
                   </div>
               </div>
               <div className="col-9" style={{display: this.state.displayUpload ? '' : 'none'}}>
