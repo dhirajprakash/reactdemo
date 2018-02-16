@@ -1,18 +1,28 @@
 import React, { Component } from 'react';
 import './App.css';
-import {Button, Badge} from 'reactstrap';
+import {Modal, ModalHeader, ModalBody, ModalFooter, Badge, Button} from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import FaCheck from 'react-icons/lib/fa/check';
+import {CSVLink, CSVDownload} from 'react-csv';
 
 class UploadFile extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { files: [], uploadInProgress: false }
+        this.state = {
+            files: [],
+            uploadInProgress: false,
+            reports: [],
+            modal: false,
+            modalTitle:'',
+            modalBody: {}
+        }
         this.API_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8080/' : '';
+        //this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
 
+        this.toggle = this.toggle.bind(this);
     }
 
     uploadFiles(files) {
@@ -29,13 +39,37 @@ class UploadFile extends Component {
             return false;
         }
         this.setState({files: files, uploadInProgress:true});
-        fetch(this.API_URL + 'queries/upload', {
+        fetch(this.API_URL + 'reports/upload', {
             method: 'POST',
             body: formData
         }).then(
             response => {
-                response.json();
-                this.setState({uploadInProgress: false});
+                console.log(response);
+                if (response.status === 200) {
+                    response.json().then(data => {
+                        console.log(data);
+                        const uploadedReports = [];
+                        let found = false;
+                        for(let i=0; i<this.state.reports.length;i++){
+                            found = false;
+                            for(let j=0;j<data.length;j++){
+                                if(this.state.reports[i].reportId === data[j].reportId){
+                                    found = true;
+                                }
+                            }
+                            if(!found){
+                                uploadedReports.push(this.state.reports[i]);
+                            }
+                        }
+                        data.map(rpt=> {
+                           uploadedReports.unshift(rpt);
+                        });
+                        this.setState({reports: uploadedReports, uploadInProgress: false});
+                    })
+                } else {
+                    console.log('Problem encountered. Status Code: ' +
+                        response.status);
+                }
             }
         ).then(
             success => console.log(success)
@@ -44,111 +78,179 @@ class UploadFile extends Component {
         );
     }
 
-    render() {
-        const data = [
-            {
-               id: '1',
-               fileName: '11986.pdf',
-                uploader: 'Dhiraj Prakash',
-                uploadDt: ''
-            },
-            {
-                id: '2',
-                fileName: '11778.pdf',
-                uploader: 'Pratik Ranjan',
-                uploadDt: '15/JAN/2018'
-            },
-            {
-                id: '3',
-                fileName: '11986.pdf',
-                uploader: 'Dhiraj Prakash',
-                uploadDt: ''
-            },
-            {
-                id: '4',
-                fileName: '11778.pdf',
-                uploader: 'Pratik Ranjan',
-                uploadDt: '15/JAN/2018'
-            },
-            {
-                id: '5',
-                fileName: '11986.pdf',
-                uploader: 'Dhiraj Prakash',
-                uploadDt: ''
-            },
-            {
-                id: '6',
-                fileName: '11778.pdf',
-                uploader: 'Pratik Ranjan',
-                uploadDt: '15/JAN/2018'
-            },
-            {
-                id: '7',
-                fileName: '11986.pdf',
-                uploader: 'Dhiraj Prakash',
-                uploadDt: ''
-            },
-            {
-                id: '8',
-                fileName: '11778.pdf',
-                uploader: 'Pratik Ranjan',
-                uploadDt: '15/JAN/2018'
+    componentDidMount() {
+        fetch(this.API_URL + 'reports', {
+            method: 'GET'
+        }).then(
+            response => {
+                if (response.status !== 200) {
+                    console.log('Problem encountered. Status Code: ' +
+                        response.status);
+                    return;
+                }
+                response.json().then(data => {
+                    this.setState({reports: data});
+                })
             }
-        ];
+        ).catch(
+            error => console.log(error)
+        );
+    }
+
+    toggle() {
+        this.setState({
+            modal: !this.state.modal
+        });
+    }
+
+    render() {
+        const csvPrettyLink  = {
+            backgroundColor: '#8dc63f',
+            fontSize: 14,
+            fontWeight: 500,
+            height: 52,
+            padding: '0 48px',
+            borderRadius: 5,
+            color: '#fff'
+        };
+
+
+        const data = this.state.reports.map(rpt => {
+            return ({
+                reportName: rpt.pdfDataMap.BoletimNo,
+                flagrante: rpt.pdfDataMap.Flagrante,
+                data: rpt.pdfDataMap.Data,
+                dependencia: rpt.pdfDataMap.Dependencia,
+                emitido: rpt.pdfDataMap.Emitido,
+                history: rpt.pdfDataMap.History.split('~').join(' '),
+                uploader: rpt.pdfDataMap.uploader,
+                localCrime: rpt.pdfDataMap.LocalCrime
+            });
+        })
 
         const columns = [
             {
-                Header: 'Sr. No.',
+                Header: 'Boletim No.',
                 headerClassName: 'bg-secondary',
-                accessor: 'id'
+                accessor: 'reportName'
             },
             {
-                Header: 'File Name',
+                Header: 'Dependencia',
                 headerClassName: 'bg-secondary',
-                accessor: 'fileName'
+                accessor: 'dependencia'
+            },
+            {
+                Header: 'Flagrante',
+                headerClassName: 'bg-secondary',
+                accessor: 'flagrante'
+            },
+            {
+                Header: 'Emitido',
+                headerClassName: 'bg-secondary',
+                accessor: 'emitido'
+            },
+            {
+                Header: 'LocalCrime',
+                headerClassName: 'bg-secondary',
+                accessor: 'localCrime',
             },
             {
                 Header: 'Uploaded By',
                 headerClassName: 'bg-secondary',
-                accessor: 'uploader',
-            },
-            {
-                Header: 'Uploaded On',
-                headerClassName: 'bg-secondary',
-                accessor: 'uploadDt'
+                accessor: 'uploader'
             }
             ];
+
         return (
             <div align="center" className="mt-5">
-                <div style={{height: '40vh', overflow: 'auto'}}>
+                <div style={{height: '68vh', overflow: 'auto'}}>
                     <ReactTable
-                        data={data}
+                        getTdProps={(state, rowInfo, column, instance) => {
+                            return {
+                                onClick: (e) => {
+                                    if (rowInfo) {
+                                        console.log(rowInfo.original);
+                                        this.setState({
+                                            modalTitle: rowInfo.original.reportName,
+                                            modalBody: rowInfo.original
+                                        });
+                                        this.toggle();
+                                    }
+                                }
+                                }
+                            }
+                        }
                         columns={columns}
-                        defaultPageSize={5}
+                        data={data}
+                        defaultPageSize={10}
+                        noDataText="No reports found!"
                         className="-striped -highlight bg-dark text-light"
                     />
 
                 </div>
                 <br/>
-                <div className="row ">
+                <div className="row">
                     <div className="col-3">
-                    <div className="dropzone" align="left">
-                        <Dropzone
-                                  accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
+                    <div className="btn-outline-primary btn-block btn" align="left">
+                        <Dropzone disabled={this.state.uploadInProgress} style={{height:'12vh'}} accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
                             <div>
-                                <p className="text-warning">Click or Drag Files Here...</p>
+                                <p className="text-light mt-4">Click or Drop Files Here...</p>
                             </div>
                         </Dropzone>
                     </div>
                     </div>
-                    <div className="col-4">
+                    <div className="col-4" style={{height: '13vh', overflow: 'auto'}}>
                         <ul>
                             {
                                 this.state.files.map(f => <div className="row mt-2"><Badge key={f.name} className="badge-secondary btn-block" style={{width:'80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ? <div className="File-loader mt-1"></div> : <FaCheck style={{color: 'green'}}/>}</div>)
                             }
                         </ul>
                     </div>
+                    <div className="col-4" align="right">
+                    <span>
+                        <CSVLink data={data} style={csvPrettyLink} filename="Boletim.csv">CSV ⬇</CSVLink>
+                    </span>
+                    </div>
                 </div>
+
+                <Modal isOpen={this.state.modal} toggle={this.toggle} size="lg">
+                    <ModalHeader toggle={this.toggle}>Boletim: {this.state.modalTitle}</ModalHeader>
+                    <ModalBody>
+                        <div>
+                            <Badge color="primary">Data:</Badge>
+                            <p>{this.state.modalBody.data}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Emitido:</Badge>
+                            <p>{this.state.modalBody.emitido}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">LocalCrime:</Badge>
+                            <p>{this.state.modalBody.localCrime}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Dependencia:</Badge>
+                            <p>{this.state.modalBody.dependencia}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Flagrante:</Badge>
+                            <p>{this.state.modalBody.flagrante}</p>
+                        </div>
+
+                        <div>
+                            <Badge color="primary">Histórico:</Badge>
+                            <p>{this.state.modalBody.history}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Uploader:</Badge>
+                            <p>{this.state.modalBody.uploader}</p>
+                        </div>
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="secondary" onClick={this.toggle}>Close</Button>
+                    </ModalFooter>
+                </Modal>
             </div>
         );
     }
