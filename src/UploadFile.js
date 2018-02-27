@@ -104,16 +104,6 @@ class UploadFile extends Component {
     }
 
     render() {
-        const csvPrettyLink  = {
-            backgroundColor: '#8dc63f',
-            fontSize: 14,
-            fontWeight: 500,
-            height: 52,
-            padding: '0 48px',
-            borderRadius: 5,
-            color: '#fff'
-        };
-
 
         const data = this.state.reports.map(rpt => {
             return ({
@@ -191,10 +181,10 @@ class UploadFile extends Component {
                 <br/>
                 <div className="row">
                     <div className="col-3">
-                    <div className="btn-outline-primary btn-block btn" align="left">
-                        <Dropzone disabled={this.state.uploadInProgress} style={{height:'12vh'}} accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
+                    <div align="left">
+                        <Dropzone disabled={this.state.uploadInProgress} style={{}} accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
                             <div>
-                                <p className="text-light mt-4">Click or Drop Files Here...</p>
+                                <Button outline color="warning">Click or Drop Files Here...</Button>
                             </div>
                         </Dropzone>
                     </div>
@@ -208,7 +198,7 @@ class UploadFile extends Component {
                     </div>
                     <div className="col-4" align="right">
                     <span>
-                        <CSVLink data={data} style={csvPrettyLink} filename="Boletim.csv">CSV ⬇</CSVLink>
+                        <CSVLink data={data} filename="Boletim.csv"><Button outline color="warning">CSV ⬇</Button></CSVLink>
                     </span>
                     </div>
                 </div>

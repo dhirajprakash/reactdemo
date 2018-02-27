@@ -1,47 +1,27 @@
 import React, { Component } from 'react';
 import './App.css';
- import {Button, Badge} from 'reactstrap';
-import UploadFile from "./UploadFile";
+import Home from './Home';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Security, ImplicitCallback } from '@okta/okta-react';
+
+const config = {
+    issuer: 'https://dev-512547.oktapreview.com/oauth2/default',
+    redirect_uri: window.location.origin + '/implicit/callback',
+    client_id: '0oae057tzmrQTeTtx0h7'
+}
 
 class App extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state ={
-            displayReport: false,
-            displayUpload: true
-        }
-    }
-
-    manageDisplay(component) {
-        if (component === 'report'){
-            this.setState({displayReport: true, displayUpload: false});
-        } else if(component === 'upload') {
-            this.setState({displayReport: false, displayUpload: true});
-        }
-    }
-
   render() {
     return (
-      <div className="App container-fluid">
-          <div className="row">
-              <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
-                  <h4><Badge color="light">Integracaodeforcas</Badge></h4>
-                  <Button size="sm" outline color="warning">Log Out</Button>
-              </nav>
-          </div>
-          <div className="row">
-              <div className="col-2 bg-dark btn-group" style={{marginTop: '7vh', height: '93vh'}}>
-                  <div className="nav flex-column btn-block mt-2">
-                      <Button outline color="warning" className="mt-1" onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
-                      <Button outline color="warning" onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
-                  </div>
-              </div>
-              <div className="col-9" style={{display: this.state.displayUpload ? '' : 'none'}}>
-                  <UploadFile/>
-              </div>
-          </div>
-      </div>
+        <Router>
+            <Security issuer={config.issuer}
+                      client_id={config.client_id}
+                      redirect_uri={config.redirect_uri}>
+                <Route path='/' exact={true} component={Home}/>
+                <Route path='/implicit/callback' component={ImplicitCallback}/>
+            </Security>
+        </Router>
     );
   }
 }
