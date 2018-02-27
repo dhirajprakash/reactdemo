@@ -5,6 +5,7 @@
   "dependencies": {
     "@okta/okta-react": "^0.0.12",
     "bootstrap": "4.0.0-beta.3",
+    "isomorphic-fetch": "^2.2.1",
     "react": "^16.2.0",
     "react-csv": "^1.0.12",
     "react-dom": "^16.2.0",

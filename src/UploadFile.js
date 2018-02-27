@@ -6,6 +6,8 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import FaCheck from 'react-icons/lib/fa/check';
 import {CSVLink, CSVDownload} from 'react-csv';
+import { withAuth } from '@okta/okta-react';
+import fetch from 'isomorphic-fetch';
 
 class UploadFile extends Component {
 
@@ -19,7 +21,7 @@ class UploadFile extends Component {
             modalTitle:'',
             modalBody: {}
         }
-        this.API_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8080/' : '';
+        this.API_URL = 'http://localhost:8080/';
         //this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
 
         this.toggle = this.toggle.bind(this);
@@ -78,8 +80,22 @@ class UploadFile extends Component {
         );
     }
 
-    componentDidMount() {
-        fetch(this.API_URL + 'reports', {
+    async componentDidMount() {
+        try {
+            const response = await fetch(this.API_URL + 'reports', {
+                headers: {
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken()
+                }
+            });
+            const data = await response.json();
+            this.setState({reports: data});
+        } catch(err){
+            console.log(err);
+        }
+        /*fetch(this.API_URL + 'reports', {
+            headers: {
+                Authorization: 'Bearer ' + this.props.auth.getAccessToken()
+        },
             method: 'GET'
         }).then(
             response => {
@@ -94,7 +110,7 @@ class UploadFile extends Component {
             }
         ).catch(
             error => console.log(error)
-        );
+        );*/
     }
 
     toggle() {
@@ -246,4 +262,4 @@ class UploadFile extends Component {
     }
 }
 
-export default UploadFile;
+export default withAuth(UploadFile);
