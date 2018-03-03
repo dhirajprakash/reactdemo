@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
-import {Button, Badge} from 'reactstrap';
+import {Button, Badge, FormGroup, Form, Col, Label} from 'reactstrap';
 import UploadFile from "./UploadFile";
 import { withAuth } from '@okta/okta-react';
+import logo from './logo.jpg';
+import FaArrowCircleORight from 'react-icons/lib/fa/arrow-circle-o-right';
 
 class Home extends Component {
 
@@ -38,18 +40,24 @@ class Home extends Component {
 
     render() {
         if (this.state.authenticated === null) return null;
+        let template;
 
         if(!this.state.authenticated ){
-           return( <div className="App container-fluid">
-                <div className="row">
-                    <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
-                        <h4><Badge color="light">Integracaodeforcas</Badge></h4>
-                        <Button size="sm" outline color="warning" onClick={this.props.auth.login}>Log In</Button>
-                    </nav>
-                </div>
-            </div>);
+            template = <div className="App-home container-fluid">
+                <br/><br/>
+                <Form onSubmit={this.handleSubmit}  style={{marginLeft:450, marginTop:50}}>
+                    <FormGroup row>
+                        <Col sm={5}>
+                            <img src={logo} height="150" />
+                        </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                        <Label for="username" sm={4} align="center"><Button size="sm" outline color="warning" onClick={this.props.auth.login}>Log In <FaArrowCircleORight style={{marginTop:-2}}/></Button></Label>
+                    </FormGroup>
+                </Form>
+            </div>;
         } else if(this.state.authenticated) {
-            return (
+            template =
                 <div className="App container-fluid">
                     <div className="row">
                         <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
@@ -71,8 +79,16 @@ class Home extends Component {
                         </div>
                     </div>
                 </div>
-            );
+            ;
         }
+
+        return (
+          <div>
+              {/*<Link to='/'>Home</Link><br/>
+              <Link to='/protected'>Protected</Link><br/>*/}
+              {template}
+          </div>
+        );
     }
 }
 

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@okta/okta-auth-js": "^1.13.0",
     "@okta/okta-react": "^0.0.12",
     "bootstrap": "4.0.0-beta.3",
     "isomorphic-fetch": "^2.2.1",

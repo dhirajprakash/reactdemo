@@ -3,6 +3,30 @@
     width: 100vw;
     background-color: #464a4e;
 }
+.App-home {
+    height: 100vh;
+    width: 100vw;
+    background-color: #2e3133;
+}
+.App-home-2 {
+    background-color: #868e96;
+}
+.App-home-bg {
+    height: 80vh;
+    width: 80vw;
+    background-image: url('./brazil_map.png');
+    background-size: cover;
+    overflow: hidden;
+    opacity: 0.9;
+    margin-left: 5vw;
+}
+.App-home-logo {
+    height: 10%;
+    width: 10%;
+    background-image: url('logo.jpg');
+    background-size: cover;
+    overflow: hidden;
+}
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
