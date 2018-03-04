@@ -13,7 +13,9 @@ class Home extends Component {
         this.state ={
             authenticated: null,
             displayReport: false,
-            displayUpload: true
+            displayUpload: true,
+            userName: '',
+            userEmail: ''
         }
         this.checkAuthentication = this.checkAuthentication.bind(this);
         this.checkAuthentication();
@@ -29,8 +31,14 @@ class Home extends Component {
 
     async checkAuthentication() {
         const authenticated = await this.props.auth.isAuthenticated();
+        const userInfo = await this.props.auth.getUser();
+        console.log(userInfo);
+
         if (authenticated !== this.state.authenticated) {
             this.setState({ authenticated });
+            if(userInfo) {
+                this.setState({userName: userInfo.name, userEmail: userInfo.email});
+            }
         }
     }
 
@@ -62,7 +70,12 @@ class Home extends Component {
                     <div className="row">
                         <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
                             <h4><Badge color="light">Integracaodeforcas</Badge></h4>
-                            <Button size="sm" outline color="warning" onClick={this.props.auth.logout}>Log Out</Button>
+
+                            <div>
+                                <Badge color="dark">{this.state.userName}</Badge>
+                                &nbsp;&nbsp;
+                                <Button size="sm" outline color="warning" onClick={this.props.auth.logout}>Log Out</Button>
+                            </div>
                         </nav>
                     </div>
                     <div className="row">
@@ -75,7 +88,7 @@ class Home extends Component {
                             </div>
                         </div>
                         <div className="col-9" style={{display: this.state.displayUpload ? '' : 'none'}}>
-                            <UploadFile/>
+                            <UploadFile userId={this.state.userEmail}/>
                         </div>
                     </div>
                 </div>
