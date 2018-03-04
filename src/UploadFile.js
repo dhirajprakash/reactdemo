@@ -84,7 +84,8 @@ class UploadFile extends Component {
         try {
             const response = await fetch(this.API_URL + 'reports', {
                 headers: {
-                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken()
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
+                    UserId: this.props.userId
                 }
             });
             const data = await response.json();
