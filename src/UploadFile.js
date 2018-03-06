@@ -27,7 +27,7 @@ class UploadFile extends Component {
         this.toggle = this.toggle.bind(this);
     }
 
-    uploadFiles(files) {
+    async uploadFiles(files) {
         let totalSize = 0;
         const formData = new FormData();
         files.map(f => {
@@ -35,49 +35,43 @@ class UploadFile extends Component {
                 formData.append('files', f);
             }
         );
-        console.log(totalSize);
-        console.log(files);
         if (totalSize > 20480000) {
             return false;
         }
         this.setState({files: files, uploadInProgress:true});
-        fetch(this.API_URL + 'reports/upload', {
-            method: 'POST',
-            body: formData
-        }).then(
-            response => {
-                console.log(response);
-                if (response.status === 200) {
-                    response.json().then(data => {
-                        console.log(data);
-                        const uploadedReports = [];
-                        let found = false;
-                        for(let i=0; i<this.state.reports.length;i++){
-                            found = false;
-                            for(let j=0;j<data.length;j++){
-                                if(this.state.reports[i].reportId === data[j].reportId){
-                                    found = true;
-                                }
-                            }
-                            if(!found){
-                                uploadedReports.push(this.state.reports[i]);
-                            }
-                        }
-                        data.map(rpt=> {
-                           uploadedReports.unshift(rpt);
-                        });
-                        this.setState({reports: uploadedReports, uploadInProgress: false});
-                    })
-                } else {
-                    console.log('Problem encountered. Status Code: ' +
-                        response.status);
+
+        try {
+            const response = await fetch(this.API_URL + 'reports/upload', {
+                headers: {
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
+                    UserId: this.props.userId
+            },
+                method: 'POST',
+                body: formData
+        });
+            const data = await response.json();
+
+            const uploadedReports = [];
+            let found = false;
+            for(let i=0; i<this.state.reports.length;i++){
+                found = false;
+                for(let j=0;j<data.length;j++){
+                    if(this.state.reports[i].reportId === data[j].reportId){
+                        found = true;
+                    }
+                }
+                if(!found){
+                    uploadedReports.push(this.state.reports[i]);
                 }
             }
-        ).then(
-            success => console.log(success)
-        ).catch(
-            error => console.log(error)
-        );
+            data.map(rpt=> {
+                uploadedReports.unshift(rpt);
+            });
+            this.setState({reports: uploadedReports, uploadInProgress: false});
+
+        } catch(err){
+            console.log(err);
+        }
     }
 
     async componentDidMount() {
@@ -93,25 +87,6 @@ class UploadFile extends Component {
         } catch(err){
             console.log(err);
         }
-        /*fetch(this.API_URL + 'reports', {
-            headers: {
-                Authorization: 'Bearer ' + this.props.auth.getAccessToken()
-        },
-            method: 'GET'
-        }).then(
-            response => {
-                if (response.status !== 200) {
-                    console.log('Problem encountered. Status Code: ' +
-                        response.status);
-                    return;
-                }
-                response.json().then(data => {
-                    this.setState({reports: data});
-                })
-            }
-        ).catch(
-            error => console.log(error)
-        );*/
     }
 
     toggle() {
