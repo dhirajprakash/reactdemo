@@ -21,8 +21,8 @@ class UploadFile extends Component {
             modalTitle:'',
             modalBody: {}
         }
-        this.API_URL = 'http://localhost:8080/';
-        //this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
+        //this.API_URL = 'http://localhost:8080/';
+        this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
 
         this.toggle = this.toggle.bind(this);
     }
