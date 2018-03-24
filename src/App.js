@@ -13,7 +13,8 @@ function onAuthRequired({history}) {
 const config = {
     issuer: 'https://dev-512547.oktapreview.com/oauth2/default',
     redirect_uri: window.location.origin + '/implicit/callback',
-    client_id: '0oae057tzmrQTeTtx0h7'
+    //client_id: '0oae057tzmrQTeTtx0h7'
+    client_id: '0oaec0zyf1tVzyXDl0h7'
 }
 
 class App extends Component {

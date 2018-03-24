@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import {Modal, ModalHeader, ModalBody, ModalFooter, Badge, Button} from 'reactstrap';
+import {Modal, ModalHeader, ModalBody, ModalFooter, Badge, Button, FormGroup, Col, Input, InputGroup, InputGroupAddon} from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
@@ -17,14 +17,18 @@ class UploadFile extends Component {
             files: [],
             uploadInProgress: false,
             reports: [],
+            searchResult: [],
             modal: false,
             modalTitle:'',
-            modalBody: {}
+            modalBody: {},
+            noDataText: 'Loading...'
         }
-        //this.API_URL = 'http://localhost:8080/';
-        this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
+        this.API_URL = 'http://localhost:8080/';
+        //this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
 
         this.toggle = this.toggle.bind(this);
+        this.searchReports = this.searchReports.bind(this);
+        this.clearSearch = this.clearSearch.bind(this);
     }
 
     async uploadFiles(files) {
@@ -67,7 +71,7 @@ class UploadFile extends Component {
             data.map(rpt=> {
                 uploadedReports.unshift(rpt);
             });
-            this.setState({reports: uploadedReports, uploadInProgress: false});
+            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false});
 
         } catch(err){
             console.log(err);
@@ -83,7 +87,12 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-            this.setState({reports: data});
+            if(data && data.length > 0) {
+                this.setState({reports: data, searchResult: data});
+            } else {
+                this.setState({noDataText: 'No reports found!'});
+            }
+
         } catch(err){
             console.log(err);
         }
@@ -95,9 +104,28 @@ class UploadFile extends Component {
         });
     }
 
+    searchReports(e) {
+        console.log(121);
+        const searchText = e.target.value;
+        if(this.state.reports.length > 0) {
+            const results = [];
+            this.state.reports.map(rpt => {
+                if(rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
+                    results.push(rpt);
+                }
+            });
+            const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
+            this.setState({searchResult: results, noDataText: message});
+        }
+    }
+
+    clearSearch() {
+        this.setState({searchResult: this.state.reports});
+    }
+
     render() {
 
-        const data = this.state.reports.map(rpt => {
+        const data = this.state.searchResult.map(rpt => {
             return ({
                 reportName: rpt.pdfDataMap.BoletimNo,
                 flagrante: rpt.pdfDataMap.Flagrante,
@@ -146,12 +174,19 @@ class UploadFile extends Component {
         return (
             <div align="center" className="mt-5">
                 <div style={{height: '68vh', overflow: 'auto'}}>
+                    <FormGroup row>
+                        <Col sm={3}>
+                            <InputGroup>
+                            <Input type="search" name="nmSearch" id="idSearch" placeholder="search..." onChange={this.searchReports} />
+                            <InputGroupAddon addonType="append" onClick={this.clearSearch} style={{cursor:'pointer'}}>x</InputGroupAddon>
+                            </InputGroup>
+                        </Col>
+                    </FormGroup>
                     <ReactTable
                         getTdProps={(state, rowInfo, column, instance) => {
                             return {
                                 onClick: (e) => {
                                     if (rowInfo) {
-                                        console.log(rowInfo.original);
                                         this.setState({
                                             modalTitle: rowInfo.original.reportName,
                                             modalBody: rowInfo.original
@@ -165,7 +200,7 @@ class UploadFile extends Component {
                         columns={columns}
                         data={data}
                         defaultPageSize={10}
-                        noDataText="No reports found!"
+                        noDataText={this.state.noDataText}
                         className="-striped -highlight bg-dark text-light"
                     />
 

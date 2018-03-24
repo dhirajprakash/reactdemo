@@ -54,7 +54,7 @@ export default withAuth(class LoginForm extends Component {
                 <Form onSubmit={this.handleSubmit}  style={{marginLeft:450, marginTop:50}}>
                     <FormGroup row>
                         <Col sm={5}>
-                        <img src={logo} height="150" />
+                            <h3><Badge color="info">INTEGRACAODEFORCAS</Badge></h3>
                         </Col>
                     </FormGroup>
                     <FormGroup row>

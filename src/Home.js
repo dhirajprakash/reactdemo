@@ -53,14 +53,10 @@ class Home extends Component {
         if(!this.state.authenticated ){
             template = <div className="App-home container-fluid">
                 <br/><br/>
-                <Form onSubmit={this.handleSubmit}  style={{marginLeft:450, marginTop:50}}>
+                <Form onSubmit={this.handleSubmit}  style={{marginLeft:'30vw', marginTop:'20vh'}}>
                     <FormGroup row>
-                        <Col sm={5}>
-                            <img src={logo} height="150" />
-                        </Col>
-                    </FormGroup>
-                    <FormGroup row>
-                        <Label for="username" sm={4} align="center"><Button size="sm" outline color="warning" onClick={this.props.auth.login}>Log In <FaArrowCircleORight style={{marginTop:-2}}/></Button></Label>
+                        <h3><Badge color="info">INTEGRACAODEFORCAS</Badge></h3>
+                        <Label for="username" align="center">&nbsp;&nbsp;<Button size="sm" outline color="warning" className="mt-1" onClick={this.props.auth.login}><FaArrowCircleORight/></Button></Label>
                     </FormGroup>
                 </Form>
             </div>;
@@ -69,10 +65,10 @@ class Home extends Component {
                 <div className="App container-fluid">
                     <div className="row">
                         <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
-                            <h4><Badge color="light">Integracaodeforcas</Badge></h4>
+                            <h4><Badge color="info">Integracaodeforcas</Badge></h4>
 
                             <div>
-                                <Badge color="dark">{this.state.userName}</Badge>
+                                <Badge color="light">{this.state.userName}</Badge>
                                 &nbsp;&nbsp;
                                 <Button size="sm" outline color="warning" onClick={this.props.auth.logout}>Log Out</Button>
                             </div>
@@ -83,11 +79,13 @@ class Home extends Component {
                             <div className="nav flex-column btn-block mt-2">
                                 <Button outline color="warning" className="mt-1"
                                         onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
-                                <Button outline color="warning"
+                                <Button outline color="warning" className="mt-1"
                                         onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
+                                <Button outline color="warning" className="mt-1"
+                                        onClick={this.manageDisplay.bind(this, 'user')}>User Management</Button>
                             </div>
                         </div>
-                        <div className="col-9" style={{display: this.state.displayUpload ? '' : 'none'}}>
+                        <div className="col-10" style={{display: this.state.displayUpload ? '' : 'none'}}>
                             <UploadFile userId={this.state.userEmail}/>
                         </div>
                     </div>
@@ -97,8 +95,6 @@ class Home extends Component {
 
         return (
           <div>
-              {/*<Link to='/'>Home</Link><br/>
-              <Link to='/protected'>Protected</Link><br/>*/}
               {template}
           </div>
         );
