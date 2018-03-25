@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 import {Button, Badge, FormGroup, Form, Col, Label} from 'reactstrap';
-import UploadFile from "./UploadFile";
+import UploadFile from './UploadFile';
 import { withAuth } from '@okta/okta-react';
-import logo from './logo.jpg';
 import FaArrowCircleORight from 'react-icons/lib/fa/arrow-circle-o-right';
+import UserManagement from './UserManagement';
 
 class Home extends Component {
 
@@ -14,8 +14,11 @@ class Home extends Component {
             authenticated: null,
             displayReport: false,
             displayUpload: true,
+            displayUserManagement: false,
             userName: '',
-            userEmail: ''
+            userEmail: '',
+            displayAddUserMenu: false,
+            userRole: ''
         }
         this.checkAuthentication = this.checkAuthentication.bind(this);
         this.checkAuthentication();
@@ -23,9 +26,12 @@ class Home extends Component {
 
     manageDisplay(component) {
         if (component === 'report'){
-            this.setState({displayReport: true, displayUpload: false});
+            this.setState({displayReport: true, displayUpload: false, displayUserManagement: false});
         } else if(component === 'upload') {
-            this.setState({displayReport: false, displayUpload: true});
+            this.setState({displayReport: false, displayUpload: true, displayUserManagement: false});
+        }
+        else if(component === 'user') {
+            this.setState({displayReport: false, displayUpload: false, displayUserManagement: true});
         }
     }
 
@@ -44,6 +50,16 @@ class Home extends Component {
 
     componentDidUpdate() {
         this.checkAuthentication();
+    }
+
+    updateUserRole(role) {
+        console.log(role);
+        if(role === 'SUPER_ADMIN') {
+            this.setState({userRole: role, displayAddUserMenu: true});
+        } else {
+            this.setState({userRole: role, displayAddUserMenu: false});
+        }
+
     }
 
     render() {
@@ -81,12 +97,15 @@ class Home extends Component {
                                         onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
                                 <Button outline color="warning" className="mt-1"
                                         onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
-                                <Button outline color="warning" className="mt-1"
+                                <Button outline color="warning" className="mt-1" style={{display: this.state.displayAddUserMenu ? '' : 'none'}}
                                         onClick={this.manageDisplay.bind(this, 'user')}>User Management</Button>
                             </div>
                         </div>
                         <div className="col-10" style={{display: this.state.displayUpload ? '' : 'none'}}>
-                            <UploadFile userId={this.state.userEmail}/>
+                            <UploadFile updateUser={role=>this.updateUserRole(role)} userId={this.state.userEmail}/>
+                        </div>
+                        <div className="col-10" style={{display: this.state.displayUserManagement ? '' : 'none'}}>
+                            <UserManagement userId={this.state.userEmail}/>
                         </div>
                     </div>
                 </div>

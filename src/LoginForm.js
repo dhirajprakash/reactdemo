@@ -3,7 +3,6 @@ import OktaAuth from '@okta/okta-auth-js';
 import { withAuth } from '@okta/okta-react';
 import {Button, FormGroup, Label, Input, Form, Badge, Col} from 'reactstrap';
 import FaArrowCircleORight from 'react-icons/lib/fa/arrow-circle-o-right';
-import logo from './logo.jpg';
 
 export default withAuth(class LoginForm extends Component {
     constructor(props) {

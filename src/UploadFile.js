@@ -8,6 +8,7 @@ import FaCheck from 'react-icons/lib/fa/check';
 import {CSVLink, CSVDownload} from 'react-csv';
 import { withAuth } from '@okta/okta-react';
 import fetch from 'isomorphic-fetch';
+import Helper from "./Helper";
 
 class UploadFile extends Component {
 
@@ -23,8 +24,6 @@ class UploadFile extends Component {
             modalBody: {},
             noDataText: 'Loading...'
         }
-        this.API_URL = 'http://localhost:8080/';
-        //this.API_URL = 'http://35.169.168.197:8080/integracaodeforcas/';
 
         this.toggle = this.toggle.bind(this);
         this.searchReports = this.searchReports.bind(this);
@@ -45,7 +44,7 @@ class UploadFile extends Component {
         this.setState({files: files, uploadInProgress:true});
 
         try {
-            const response = await fetch(this.API_URL + 'reports/upload', {
+            const response = await fetch(Helper.getAPI() + 'reports/upload', {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     UserId: this.props.userId
@@ -80,7 +79,7 @@ class UploadFile extends Component {
 
     async componentDidMount() {
         try {
-            const response = await fetch(this.API_URL + 'reports', {
+            const response = await fetch(Helper.getAPI() + 'reports', {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     UserId: this.props.userId
@@ -88,12 +87,14 @@ class UploadFile extends Component {
             });
             const data = await response.json();
             if(data && data.length > 0) {
+                this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data});
             } else {
                 this.setState({noDataText: 'No reports found!'});
             }
 
         } catch(err){
+            this.setState({noDataText: 'No reports found!'});
             console.log(err);
         }
     }
