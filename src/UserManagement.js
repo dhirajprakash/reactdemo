@@ -7,6 +7,7 @@ import fetch from 'isomorphic-fetch';
 import Helper from './Helper';
 import FaCheckCircle from 'react-icons/lib/fa/check-circle';
 import TiDelete from 'react-icons/lib/ti/delete';
+import ReactTable from 'react-table';
 
 class UserManagement extends Component {
 
@@ -18,33 +19,36 @@ class UserManagement extends Component {
             emailIdValid: '',
             firstName: '',
             lastName: '',
-            emailId: ''
+            emailId: '',
+            users: [],
+            searchedUsers: [],
+            noDataText: 'Loading...'
         }
 
         this.addUser = this.addUser.bind(this);
         this.validate = this.validate.bind(this);
     }
 
-    /*async componentDidMount() {
+    async componentDidMount() {
         try {
-            const response = await fetch(this.API_URL + 'reports', {
+            const response = await fetch(Helper.getAPI() + 'users', {
                 headers: {
-                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
-                    UserId: this.props.userId
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken()
                 }
             });
             const data = await response.json();
+            console.log(data);
             if(data && data.length > 0) {
-                this.setState({reports: data, searchResult: data});
+                this.setState({users: data, searchedUsers: data});
             } else {
-                this.setState({noDataText: 'No reports found!'});
+                this.setState({noDataText: 'No users added!'});
             }
 
         } catch(err){
-            this.setState({noDataText: 'No reports found!'});
+            this.setState({noDataText: 'No users added!'});
             console.log(err);
         }
-    }*/
+    }
     validate(e) {
         const targetName = e.target.name;
         const targetValue = e.target.value;
@@ -102,6 +106,31 @@ class UserManagement extends Component {
     }
 
     render() {
+        const data = this.state.searchedUsers.map(usr => {
+            return ({
+                emailId: usr.userId,
+                role: usr.role,
+                active: usr.active
+                });
+        })
+
+        const columns = [
+           {
+                Header: 'Email Id',
+                headerClassName: 'bg-secondary',
+                accessor: 'emailId'
+            },
+            {
+                Header: 'Role',
+                headerClassName: 'bg-secondary',
+                accessor: 'role'
+            },
+            {
+                Header: 'Active',
+                headerClassName: 'bg-secondary',
+                accessor: 'active'
+            }
+        ];
         return (
             <div className="mt-5">
                 <h5><Badge color="light">Add User</Badge></h5>
@@ -151,6 +180,14 @@ class UserManagement extends Component {
                         </FormGroup>
                     </Form>
                 </div>
+
+                <ReactTable
+                    columns={columns}
+                    data={data}
+                    defaultPageSize={10}
+                    noDataText={this.state.noDataText}
+                    className="-striped -highlight bg-dark text-light"
+                />
              </div>
         );
     }
