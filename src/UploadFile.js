@@ -111,8 +111,10 @@ class UploadFile extends Component {
         if(this.state.reports.length > 0) {
             const results = [];
             this.state.reports.map(rpt => {
-                if(rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
-                    results.push(rpt);
+                if (rpt.pdfDataMap && rpt.pdfDataMap.RAW_DATA) {
+                    if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
+                        results.push(rpt);
+                    }
                 }
             });
             const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
@@ -133,7 +135,7 @@ class UploadFile extends Component {
                 data: rpt.pdfDataMap.Data,
                 dependencia: rpt.pdfDataMap.Dependencia,
                 emitido: rpt.pdfDataMap.Emitido,
-                history: rpt.pdfDataMap.History.split('~').join(' '),
+                history: rpt.pdfDataMap.History?rpt.pdfDataMap.History.split('~').join(' '):'N.A.',
                 uploader: rpt.pdfDataMap.uploader,
                 localCrime: rpt.pdfDataMap.LocalCrime
             });

@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Security, SecureRoute, ImplicitCallback } from '@okta/okta-react';
 import Login from './Login';
 import Protected from './Protected';
+import Helper from "./Helper";
 
 function onAuthRequired({history}) {
     history.push('/login');
@@ -13,8 +14,7 @@ function onAuthRequired({history}) {
 const config = {
     issuer: 'https://dev-512547.oktapreview.com/oauth2/default',
     redirect_uri: window.location.origin + '/implicit/callback',
-    //client_id: '0oae057tzmrQTeTtx0h7'
-    client_id: '0oaec0zyf1tVzyXDl0h7'
+    client_id: Helper.getClientId()
 }
 
 class App extends Component {
