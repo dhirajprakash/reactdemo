@@ -5,6 +5,7 @@ import UploadFile from './UploadFile';
 import { withAuth } from '@okta/okta-react';
 import FaArrowCircleORight from 'react-icons/lib/fa/arrow-circle-o-right';
 import UserManagement from './UserManagement';
+import Map from './Map';
 
 class Home extends Component {
 
@@ -18,7 +19,9 @@ class Home extends Component {
             userName: '',
             userEmail: '',
             displayAddUserMenu: false,
-            userRole: ''
+            userRole: '',
+            mapData: [],
+            displayMapData: []
         }
         this.checkAuthentication = this.checkAuthentication.bind(this);
         this.checkAuthentication();
@@ -26,7 +29,7 @@ class Home extends Component {
 
     manageDisplay(component) {
         if (component === 'report'){
-            this.setState({displayReport: true, displayUpload: false, displayUserManagement: false});
+            this.setState({displayReport: true, displayUpload: false, displayUserManagement: false, displayMapData: this.state.mapData});
         } else if(component === 'upload') {
             this.setState({displayReport: false, displayUpload: true, displayUserManagement: false});
         }
@@ -60,6 +63,11 @@ class Home extends Component {
             this.setState({userRole: role, displayAddUserMenu: false});
         }
 
+    }
+
+    updateMapData(data) {
+        console.log(data);
+        this.setState({mapData: data});
     }
 
     render() {
@@ -102,11 +110,16 @@ class Home extends Component {
                             </div>
                         </div>
                         <div className="col-10" style={{display: this.state.displayUpload ? '' : 'none'}}>
-                            <UploadFile updateUser={role=>this.updateUserRole(role)} userId={this.state.userEmail}/>
+                            <UploadFile updateUser={role=>this.updateUserRole(role)} userId={this.state.userEmail} updateMapData={data=>this.updateMapData(data)} />
                         </div>
                         <div className="col-10" style={{display: this.state.displayUserManagement ? '' : 'none'}}>
                             <UserManagement userId={this.state.userEmail}/>
                         </div>
+                        {this.state.displayMapData.length > 0 &&
+                            <div className="col-10" style={{display: this.state.displayReport ? '' : 'none'}}>
+                                <Map mapData={this.state.displayMapData}/>
+                            </div>
+                        }
                     </div>
                 </div>
             ;

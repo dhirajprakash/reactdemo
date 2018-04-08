@@ -22,7 +22,9 @@ class UploadFile extends Component {
             modal: false,
             modalTitle:'',
             modalBody: {},
-            noDataText: 'Loading...'
+            noDataText: 'Loading...',
+            mapData: [],
+            reportDisplayData: []
         }
 
         this.toggle = this.toggle.bind(this);
@@ -67,11 +69,19 @@ class UploadFile extends Component {
                     uploadedReports.push(this.state.reports[i]);
                 }
             }
+            const mapData = this.state.mapData;
             data.map(rpt=> {
                 uploadedReports.unshift(rpt);
+                if(rpt.pdfDataMap.Latitude && rpt.pdfDataMap.Longitude) {
+                    mapData.push({
+                        lat: parseFloat(rpt.pdfDataMap.Latitude),
+                        lng: parseFloat(rpt.pdfDataMap.Longitude),
+                        name: rpt.pdfDataMap.BoletimNo
+                    });
+                }
             });
-            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false});
-
+            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false, mapData: mapData});
+            this.props.updateMapData(mapData);
         } catch(err){
             console.log(err);
         }
@@ -88,7 +98,37 @@ class UploadFile extends Component {
             const data = await response.json();
             if(data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
-                this.setState({reports: data, searchResult: data});
+
+                const mapCoordinates = [];
+                const reportDisplayData = data.map(rpt => {
+                    if(rpt.pdfDataMap.Latitude && rpt.pdfDataMap.Longitude)
+                    mapCoordinates.push({lat: parseFloat(rpt.pdfDataMap.Latitude), lng: parseFloat(rpt.pdfDataMap.Longitude), name: rpt.pdfDataMap.BoletimNo});
+                    return ({
+                        reportName: rpt.pdfDataMap.BoletimNo,
+                        flagrante: rpt.pdfDataMap.Flagrante,
+                        data: rpt.pdfDataMap.Data,
+                        dependencia: rpt.pdfDataMap.Dependencia,
+                        emitido: rpt.pdfDataMap.Emitido,
+                        history: rpt.pdfDataMap.History?rpt.pdfDataMap.History.split('~').join(' '):'N.A.',
+                        uploader: rpt.pdfDataMap.uploader,
+                        localCrime: rpt.pdfDataMap.LocalCrime,
+                        s3ReportName: rpt.pdfDataMap.s3ReportName,
+                        longitude: rpt.pdfDataMap.Longitude,
+                        latitude: rpt.pdfDataMap.Latitude,
+                        Especie: rpt.pdfDataMap.Especie,
+                        Year: rpt.pdfDataMap.Year,
+                        Autoria: rpt.pdfDataMap.Autoria,
+                        Circunscricao: rpt.pdfDataMap.Circunscricao,
+                        PeriodoCommunicacao: rpt.pdfDataMap.PeriodoCommunicacao,
+                        PeriodoElaboracao: rpt.pdfDataMap.PeriodoElaboracao,
+                        Rubrica: rpt.pdfDataMap.Rubrica,
+                        TipoDeLocal: rpt.pdfDataMap.TipoDeLocal
+                    });
+                });
+
+                this.setState({reports: data, searchResult: data, reportDisplayData: reportDisplayData, mapData: mapCoordinates});
+                this.props.updateMapData(mapCoordinates);
+
             } else {
                 this.setState({noDataText: 'No reports found!'});
             }
@@ -126,21 +166,25 @@ class UploadFile extends Component {
         this.setState({searchResult: this.state.reports});
     }
 
-    render() {
-
-        const data = this.state.searchResult.map(rpt => {
-            return ({
-                reportName: rpt.pdfDataMap.BoletimNo,
-                flagrante: rpt.pdfDataMap.Flagrante,
-                data: rpt.pdfDataMap.Data,
-                dependencia: rpt.pdfDataMap.Dependencia,
-                emitido: rpt.pdfDataMap.Emitido,
-                history: rpt.pdfDataMap.History?rpt.pdfDataMap.History.split('~').join(' '):'N.A.',
-                uploader: rpt.pdfDataMap.uploader,
-                localCrime: rpt.pdfDataMap.LocalCrime
+    async getReportLink(s3ReportName) {
+        console.log(s3ReportName);
+        try {
+            const response = await fetch(Helper.getAPI() + 'reports/link?fileName='+s3ReportName, {
+                headers: {
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken()
+                },
+                method: 'GET'
             });
-        })
+            const data = await response.text();
+            var win = window.open(data, '_blank');
+            win.focus();
+        } catch(err){
+            console.log(err);
+        }
+    }
 
+    render() {
+        const data = this.state.reportDisplayData;
         const columns = [
             {
                 Header: 'Boletim No.',
@@ -222,7 +266,7 @@ class UploadFile extends Component {
                     <div className="col-4" style={{height: '13vh', overflow: 'auto'}}>
                         <ul>
                             {
-                                this.state.files.map(f => <div className="row mt-2"><Badge key={f.name} className="badge-secondary btn-block" style={{width:'80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ? <div className="File-loader mt-1"></div> : <FaCheck style={{color: 'green'}}/>}</div>)
+                                this.state.files.map(f => <div key={f.name} className="row mt-2"><Badge key={f.name} className="badge-secondary btn-block" style={{width:'80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ? <div className="File-loader mt-1"></div> : <FaCheck style={{color: 'green'}}/>}</div>)
                             }
                         </ul>
                     </div>
@@ -238,6 +282,7 @@ class UploadFile extends Component {
                     <ModalBody>
                         <div>
                             <Badge color="primary">Data:</Badge>
+                            <Button outline color="primary" size="sm" className="float-right" onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View Report</Button>
                             <p>{this.state.modalBody.data}</p>
                         </div>
                         <div>

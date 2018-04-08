@@ -37,7 +37,6 @@ class UserManagement extends Component {
                 }
             });
             const data = await response.json();
-            console.log(data);
             if(data && data.length > 0) {
                 this.setState({users: data, searchedUsers: data});
             } else {
