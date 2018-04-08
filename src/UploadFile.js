@@ -214,7 +214,7 @@ class UploadFile extends Component {
                     <div align="left">
                         <Dropzone disabled={this.state.uploadInProgress} style={{}} accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
                             <div>
-                                <Button outline color="warning">Click or Drop Files Here...</Button>
+                                <Button outline color="warning">Clique ou Arraste arquivos aqui (pdf)</Button>
                             </div>
                         </Dropzone>
                     </div>
@@ -268,7 +268,7 @@ class UploadFile extends Component {
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="secondary" onClick={this.toggle}>Close</Button>
+                        <Button color="secondary" onClick={this.toggle}>Fechar</Button>
                     </ModalFooter>
                 </Modal>
             </div>
