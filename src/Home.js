@@ -94,7 +94,7 @@ class Home extends Component {
                         <div className="col-2 bg-dark btn-group" style={{marginTop: '7vh', height: '93vh'}}>
                             <div className="nav flex-column btn-block mt-2">
                                 <Button outline color="warning" className="mt-1"
-                                        onClick={this.manageDisplay.bind(this, 'upload')}>Enviar Arquivo</Button>
+                                        onClick={this.manageDisplay.bind(this, 'upload')}>Arquivo Enviado</Button>
                                 <Button outline color="warning" className="mt-1"
                                         onClick={this.manageDisplay.bind(this, 'report')}>Relatorios</Button>
                                 <Button outline color="warning" className="mt-1" style={{display: this.state.displayAddUserMenu ? '' : 'none'}}
