@@ -81,12 +81,12 @@ class Home extends Component {
                 <div className="App container-fluid">
                     <div className="row">
                         <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
-                            <h4><Badge color="info">Integracaodeforcas</Badge></h4>
+                            <h4><Badge color="info">INTEGRACAODEFORCAS</Badge></h4>
 
                             <div>
                                 <Badge color="light">{this.state.userName}</Badge>
                                 &nbsp;&nbsp;
-                                <Button size="sm" outline color="warning" onClick={this.props.auth.logout}>Log Out</Button>
+                                <Button size="sm" outline color="warning" onClick={this.props.auth.logout}>Sair</Button>
                             </div>
                         </nav>
                     </div>
@@ -94,11 +94,11 @@ class Home extends Component {
                         <div className="col-2 bg-dark btn-group" style={{marginTop: '7vh', height: '93vh'}}>
                             <div className="nav flex-column btn-block mt-2">
                                 <Button outline color="warning" className="mt-1"
-                                        onClick={this.manageDisplay.bind(this, 'upload')}>Upload</Button>
+                                        onClick={this.manageDisplay.bind(this, 'upload')}>Arquivo Enviado</Button>
                                 <Button outline color="warning" className="mt-1"
-                                        onClick={this.manageDisplay.bind(this, 'report')}>Reports</Button>
+                                        onClick={this.manageDisplay.bind(this, 'report')}>Relatorios</Button>
                                 <Button outline color="warning" className="mt-1" style={{display: this.state.displayAddUserMenu ? '' : 'none'}}
-                                        onClick={this.manageDisplay.bind(this, 'user')}>User Management</Button>
+                                        onClick={this.manageDisplay.bind(this, 'user')}>Gerenciar Usuarios</Button>
                             </div>
                         </div>
                         <div className="col-10" style={{display: this.state.displayUpload ? '' : 'none'}}>

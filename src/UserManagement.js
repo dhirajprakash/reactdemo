@@ -133,14 +133,14 @@ class UserManagement extends Component {
         ];
         return (
             <div className="mt-5">
-                <h5><Badge color="light">Add User</Badge></h5>
+                <h5><Badge color="light">Adicionar Usuarios</Badge></h5>
                 <br/>
                 <div style={{border:'0px solid grey'}}>
                     <Form>
                         <FormGroup row className="mt-2 ml-2 mr-2">
                             <Col sm={3}>
                                 <InputGroup>
-                                    <Input type="email" name="nmEmail" id="idEmail" placeholder="email id" onBlur={this.validate} />
+                                    <Input type="email" name="nmEmail" id="idEmail" placeholder="Email" onBlur={this.validate} />
                                     <InputGroupAddon addonType="append" className="bg-light" style={{display: this.state.emailIdValid==='Y'?'':'none'}}>
                                         <FaCheckCircle style={{color: 'green'}}/>
                                     </InputGroupAddon>
@@ -152,7 +152,7 @@ class UserManagement extends Component {
 
                             <Col sm={3}>
                                 <InputGroup>
-                                    <Input type="text" name="nmFirstName" id="idFirstName" placeholder="first name" onBlur={this.validate} />
+                                    <Input type="text" name="nmFirstName" id="idFirstName" placeholder="Primeiro Nome" onBlur={this.validate} />
                                     <InputGroupAddon addonType="append" className="bg-light" style={{display: this.state.firstNameValid==='Y'?'':'none'}}>
                                         <FaCheckCircle style={{color: 'green'}}/>
                                     </InputGroupAddon>
@@ -164,7 +164,7 @@ class UserManagement extends Component {
 
                             <Col sm={3}>
                                 <InputGroup>
-                                    <Input type="text" name="nmLastName" id="idLastName" placeholder="last name" onBlur={this.validate} />
+                                    <Input type="text" name="nmLastName" id="idLastName" placeholder="Sobre Nome" onBlur={this.validate} />
                                     <InputGroupAddon addonType="append" className="bg-light" style={{display: this.state.lastNameValid==='Y'?'':'none'}}>
                                         <FaCheckCircle style={{color: 'green'}}/>
                                     </InputGroupAddon>
@@ -175,7 +175,7 @@ class UserManagement extends Component {
                             </Col>
 
                             <Col sm={3}>
-                                <Button size="sm" disabled={!(this.state.firstNameValid==='Y' && this.state.lastNameValid==='Y' && this.state.emailIdValid==='Y')} className="mt-1" outline color="warning" onClick={this.addUser}>Add User</Button>
+                                <Button size="sm" disabled={!(this.state.firstNameValid==='Y' && this.state.lastNameValid==='Y' && this.state.emailIdValid==='Y')} className="mt-1" outline color="warning" onClick={this.addUser}>Adicionar Usuarios</Button>
                             </Col>
                         </FormGroup>
                     </Form>
