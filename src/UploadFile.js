@@ -1,14 +1,24 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import './App.css';
-import {Modal, ModalHeader, ModalBody, ModalFooter, Badge, Button, FormGroup, Col, Input, InputGroup, InputGroupAddon} from 'reactstrap';
+import {
+    Modal,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Badge,
+    Button
+} from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import FaCheck from 'react-icons/lib/fa/check';
 import {CSVLink, CSVDownload} from 'react-csv';
-import { withAuth } from '@okta/okta-react';
+import {withAuth} from '@okta/okta-react';
 import fetch from 'isomorphic-fetch';
-import Helper from "./Helper";
+import Helper from './Helper';
+import uuid from 'uuid';
+import TiDelete from 'react-icons/lib/ti/delete';
+import moment from 'moment';
 
 class UploadFile extends Component {
 
@@ -20,19 +30,26 @@ class UploadFile extends Component {
             reports: [],
             searchResult: [],
             modal: false,
-            modalTitle:'',
+            modalTitle: '',
             modalBody: {},
             noDataText: 'Loading...',
             mapData: [],
-            reportDisplayData: []
+            searchText: '',
+            fromDate: moment().format('dd/mm/yyyy')
         }
 
         this.toggle = this.toggle.bind(this);
         this.searchReports = this.searchReports.bind(this);
         this.clearSearch = this.clearSearch.bind(this);
+        this.handleFromDate = this.handleFromDate.bind(this);
+    }
+
+    handleFromDate(val) {
+        this.setState({fromDate: val});
     }
 
     async uploadFiles(files) {
+        this.props.manageScreenLoader(true);
         let totalSize = 0;
         const formData = new FormData();
         files.map(f => {
@@ -43,52 +60,50 @@ class UploadFile extends Component {
         if (totalSize > 20480000) {
             return false;
         }
-        this.setState({files: files, uploadInProgress:true});
+        this.setState({files: files, uploadInProgress: true});
 
         try {
             const response = await fetch(Helper.getAPI() + 'reports/upload', {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     UserId: this.props.userId
-            },
+                },
                 method: 'POST',
                 body: formData
-        });
+            });
             const data = await response.json();
 
             const uploadedReports = [];
             let found = false;
-            for(let i=0; i<this.state.reports.length;i++){
+            for (let i = 0; i < this.state.reports.length; i++) {
                 found = false;
-                for(let j=0;j<data.length;j++){
-                    if(this.state.reports[i].reportId === data[j].reportId){
+                for (let j = 0; j < data.length; j++) {
+                    if (this.state.reports[i].reportId === data[j].reportId) {
                         found = true;
                     }
                 }
-                if(!found){
+                if (!found) {
                     uploadedReports.push(this.state.reports[i]);
                 }
             }
-            const mapData = this.state.mapData;
-            data.map(rpt=> {
+            data.map(rpt => {
                 uploadedReports.unshift(rpt);
-                if(rpt.pdfDataMap.Latitude && rpt.pdfDataMap.Longitude) {
-                    mapData.push({
-                        lat: parseFloat(rpt.pdfDataMap.Latitude),
-                        lng: parseFloat(rpt.pdfDataMap.Longitude),
-                        name: rpt.pdfDataMap.BoletimNo
-                    });
-                }
             });
-            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false, mapData: mapData});
-            this.props.updateMapData(mapData);
-        } catch(err){
+            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false});
+            this.props.notify('Success', 'success', 'files uploaded!');
+            this.props.manageScreenLoader(false);
+            this.getMapCoordinates(uploadedReports);
+
+        } catch (err) {
             console.log(err);
+            this.props.notify('Error', 'error', 'upload failed. Contact support team!');
+            this.props.manageScreenLoader(false);
         }
     }
 
     async componentDidMount() {
         try {
+            this.props.manageScreenLoader(true);
             const response = await fetch(Helper.getAPI() + 'reports', {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
@@ -96,47 +111,37 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-            if(data && data.length > 0) {
+
+            if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
+                this.setState({reports: data, searchResult: data, tableLoading: false});
+                this.getMapCoordinates(data);
 
-                const mapCoordinates = [];
-                const reportDisplayData = data.map(rpt => {
-                    if(rpt.pdfDataMap.Latitude && rpt.pdfDataMap.Longitude)
-                    mapCoordinates.push({lat: parseFloat(rpt.pdfDataMap.Latitude), lng: parseFloat(rpt.pdfDataMap.Longitude), name: rpt.pdfDataMap.BoletimNo});
-                    return ({
-                        reportName: rpt.pdfDataMap.BoletimNo,
-                        flagrante: rpt.pdfDataMap.Flagrante,
-                        data: rpt.pdfDataMap.Data,
-                        dependencia: rpt.pdfDataMap.Dependencia,
-                        emitido: rpt.pdfDataMap.Emitido,
-                        history: rpt.pdfDataMap.History?rpt.pdfDataMap.History.split('~').join(' '):'N.A.',
-                        uploader: rpt.pdfDataMap.uploader,
-                        localCrime: rpt.pdfDataMap.LocalCrime,
-                        s3ReportName: rpt.pdfDataMap.s3ReportName,
-                        longitude: rpt.pdfDataMap.Longitude,
-                        latitude: rpt.pdfDataMap.Latitude,
-                        Especie: rpt.pdfDataMap.Especie,
-                        Year: rpt.pdfDataMap.Year,
-                        Autoria: rpt.pdfDataMap.Autoria,
-                        Circunscricao: rpt.pdfDataMap.Circunscricao,
-                        PeriodoCommunicacao: rpt.pdfDataMap.PeriodoCommunicacao,
-                        PeriodoElaboracao: rpt.pdfDataMap.PeriodoElaboracao,
-                        Rubrica: rpt.pdfDataMap.Rubrica,
-                        TipoDeLocal: rpt.pdfDataMap.TipoDeLocal
-                    });
-                });
-
-                this.setState({reports: data, searchResult: data, reportDisplayData: reportDisplayData, mapData: mapCoordinates});
-                this.props.updateMapData(mapCoordinates);
 
             } else {
-                this.setState({noDataText: 'No reports found!'});
+                this.setState({noDataText: 'No reports found!', tableLoading: false});
             }
-
-        } catch(err){
-            this.setState({noDataText: 'No reports found!'});
+            this.props.manageScreenLoader(false);
+        } catch (err) {
+            this.setState({noDataText: 'No reports found!', tableLoading: false});
             console.log(err);
+            this.props.manageScreenLoader(false);
         }
+    }
+
+    getMapCoordinates(data) {
+        const coordinates = [];
+        data.map(rpt => {
+            coordinates.push({
+                id: uuid.v4(),
+                lat: parseFloat(rpt.pdfDataMap.Latitude),
+                lng: parseFloat(rpt.pdfDataMap.Longitude),
+                name: rpt.pdfDataMap.BoletimNo
+            });
+        });
+        console.log(coordinates);
+        this.setState({mapData: coordinates});
+        this.props.updateMapData(coordinates);
     }
 
     toggle() {
@@ -146,9 +151,8 @@ class UploadFile extends Component {
     }
 
     searchReports(e) {
-        console.log(121);
         const searchText = e.target.value;
-        if(this.state.reports.length > 0) {
+        if (this.state.reports.length > 0) {
             const results = [];
             this.state.reports.map(rpt => {
                 if (rpt.pdfDataMap && rpt.pdfDataMap.RAW_DATA) {
@@ -157,34 +161,65 @@ class UploadFile extends Component {
                     }
                 }
             });
+            console.log(results);
             const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
             this.setState({searchResult: results, noDataText: message});
+            this.getMapCoordinates(results);
         }
     }
 
     clearSearch() {
-        this.setState({searchResult: this.state.reports});
+        this.setState({searchResult: this.state.reports, searchText: ''});
+        this.getMapCoordinates(this.state.reports);
+        this.refs.searchBox.value = '';
     }
 
     async getReportLink(s3ReportName) {
         console.log(s3ReportName);
+        this.props.manageScreenLoader(true);
         try {
-            const response = await fetch(Helper.getAPI() + 'reports/link?fileName='+s3ReportName, {
+            const response = await fetch(Helper.getAPI() + 'reports/link?fileName=' + s3ReportName, {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken()
                 },
                 method: 'GET'
             });
             const data = await response.text();
-            var win = window.open(data, '_blank');
+            this.props.manageScreenLoader(false);
+            const win = window.open(data, '_blank');
             win.focus();
-        } catch(err){
+        } catch (err) {
             console.log(err);
+            this.props.manageScreenLoader(false);
         }
     }
 
     render() {
-        const data = this.state.reportDisplayData;
+
+        const data = this.state.searchResult.map(rpt => {
+            return ({
+                reportName: rpt.pdfDataMap.BoletimNo,
+                flagrante: rpt.pdfDataMap.Flagrante,
+                data: rpt.pdfDataMap.Data,
+                dependencia: rpt.pdfDataMap.Dependencia,
+                emitido: rpt.pdfDataMap.Emitido,
+                history: rpt.pdfDataMap.History ? rpt.pdfDataMap.History.split('~').join(' ') : 'N.A.',
+                uploader: rpt.pdfDataMap.uploader,
+                localCrime: rpt.pdfDataMap.LocalCrime,
+                s3ReportName: rpt.pdfDataMap.s3ReportName,
+                longitude: rpt.pdfDataMap.Longitude,
+                latitude: rpt.pdfDataMap.Latitude,
+                Especie: rpt.pdfDataMap.Especie,
+                Year: rpt.pdfDataMap.Year,
+                Autoria: rpt.pdfDataMap.Autoria,
+                Circunscricao: rpt.pdfDataMap.Circunscricao,
+                PeriodoCommunicacao: rpt.pdfDataMap.PeriodoCommunicacao,
+                PeriodoElaboracao: rpt.pdfDataMap.PeriodoElaboracao,
+                Rubrica: rpt.pdfDataMap.Rubrica,
+                TipoDeLocal: rpt.pdfDataMap.TipoDeLocal
+            });
+        })
+
         const columns = [
             {
                 Header: 'Boletim No.',
@@ -216,73 +251,99 @@ class UploadFile extends Component {
                 headerClassName: 'bg-secondary',
                 accessor: 'uploader'
             }
-            ];
+        ];
 
         return (
-            <div align="center" className="mt-5">
-                <div style={{height: '68vh', overflow: 'auto'}}>
-                    <FormGroup row>
-                        <Col sm={3}>
-                            <InputGroup>
-                            <Input type="search" name="nmSearch" id="idSearch" placeholder="search..." onChange={this.searchReports} />
-                            <InputGroupAddon addonType="append" onClick={this.clearSearch} style={{cursor:'pointer'}}>x</InputGroupAddon>
-                            </InputGroup>
-                        </Col>
-                    </FormGroup>
-                    <ReactTable
-                        getTdProps={(state, rowInfo, column, instance) => {
-                            return {
-                                onClick: (e) => {
-                                    if (rowInfo) {
-                                        this.setState({
-                                            modalTitle: rowInfo.original.reportName,
-                                            modalBody: rowInfo.original
-                                        });
-                                        this.toggle();
+            <div className="mt-5">
+                <div className="mb-2 row">
+                    <div className="col-4">
+                        <input type="text" name="nmSearch" id="idSearch" placeholder="search..."
+                               onChange={this.searchReports} ref="searchBox"/>
+                        <Badge className="align-top" color="secondary" onClick={this.clearSearch} style={{cursor: 'pointer', height: 30}}>
+                            <TiDelete style={{marginTop: 5}}/></Badge>
+
+                    </div>
+                    {/*<div className="col-4 d-inline-block">
+                        <span className="d-inline-block text-light">Emitido:</span>
+                        <div className="d-inline-block">
+                            <input type="date" name="fromDate" id="fromDate" placeholder="select start of date range" onChange={this.handleFromDate} defaultValue={this.state.fromDate}
+                            />
+                        </div>
+                    </div>*/}
+                </div>
+
+
+                <div>
+                    <div>
+                        <div style={{height: '71vh', overflow: 'auto'}}>
+                            <ReactTable
+                                getTdProps={(state, rowInfo, column, instance) => {
+                                    return {
+                                        onClick: (e) => {
+                                            if (rowInfo) {
+                                                this.setState({
+                                                    modalTitle: rowInfo.original.reportName,
+                                                    modalBody: rowInfo.original
+                                                });
+                                                this.toggle();
+                                            }
+                                        }
                                     }
                                 }
                                 }
-                            }
-                        }
-                        columns={columns}
-                        data={data}
-                        defaultPageSize={10}
-                        noDataText={this.state.noDataText}
-                        className="-striped -highlight bg-dark text-light"
-                    />
+                                //loading={this.state.tableLoading}
+                                //LoadingComponent={ReactTableLoader}
+                                columns={columns}
+                                data={data}
+                                defaultPageSize={10}
+                                noDataText={this.state.noDataText}
+                                className="-striped -highlight bg-dark text-light"
+                            />
 
-                </div>
-                <br/>
-                <div className="row">
-                    <div className="col-3">
-                    <div align="left">
-                        <Dropzone disabled={this.state.uploadInProgress} style={{}} accept="application/pdf" onDrop={this.uploadFiles.bind(this)}>
-                            <div>
-                                <Button outline color="warning">Clique ou Arraste arquivos aqui (pdf)</Button>
+                        </div>
+                        <div className="row mt-1">
+                            <div className="col-3">
+                                <div align="left">
+                                    <Dropzone disabled={this.state.uploadInProgress} style={{}} accept="application/pdf"
+                                              onDrop={this.uploadFiles.bind(this)}>
+                                        <div>
+                                            <Button outline color="warning">Clique ou Arraste arquivos aqui
+                                                (pdf)</Button>
+                                        </div>
+                                    </Dropzone>
+                                </div>
                             </div>
-                        </Dropzone>
-                    </div>
-                    </div>
-                    <div className="col-4" style={{height: '13vh', overflow: 'auto'}}>
-                        <ul>
-                            {
-                                this.state.files.map(f => <div key={f.name} className="row mt-2"><Badge key={f.name} className="badge-secondary btn-block" style={{width:'80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ? <div className="File-loader mt-1"></div> : <FaCheck style={{color: 'green'}}/>}</div>)
-                            }
-                        </ul>
-                    </div>
-                    <div className="col-4" align="right">
+                            <div className="col-4 ml-5" style={{height: '13vh', overflow: 'auto'}}>
+                                <ul>
+                                    {
+                                        this.state.files.map(f => <div key={f.name} className="row mt-2"><Badge
+                                            key={f.name}
+                                            className="badge-secondary btn-block"
+                                            style={{width: '80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ?
+                                            <div className="File-loader mt-1"></div> :
+                                            <FaCheck style={{color: 'green'}}/>}
+                                        </div>)
+                                    }
+                                </ul>
+                            </div>
+                            <div className="col-4" align="right">
                     <span>
-                        <CSVLink data={data} filename="Boletim.csv"><Button outline color="warning">CSV ⬇</Button></CSVLink>
+                        <CSVLink data={data} filename="Boletim.csv"><Button outline
+                                                                            color="warning">CSV ⬇</Button></CSVLink>
                     </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <Modal isOpen={this.state.modal} toggle={this.toggle} size="lg">
+                <Modal isOpen={this.state.modal} toggle={this.toggle} size="lg" centered>
                     <ModalHeader toggle={this.toggle}>Boletim: {this.state.modalTitle}</ModalHeader>
                     <ModalBody>
                         <div>
                             <Badge color="primary">Data:</Badge>
-                            <Button outline color="primary" size="sm" className="float-right" onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View Report</Button>
+                            <Button outline color="primary" size="sm" className="float-right"
+                                    onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View
+                                Report</Button>
                             <p>{this.state.modalBody.data}</p>
                         </div>
                         <div>

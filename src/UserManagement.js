@@ -77,6 +77,9 @@ class UserManagement extends Component {
     }
 
     async addUser() {
+        let response;
+        let data;
+        this.props.manageScreenLoader(true);
         try {
             const user = {
                 firstName: this.state.firstName,
@@ -84,7 +87,7 @@ class UserManagement extends Component {
                 userId: this.state.emailId
             };
 
-            const response = await fetch(Helper.getAPI() + 'users/create', {
+             response = await fetch(Helper.getAPI() + 'users/create', {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     'Content-Type': 'application/json'
@@ -92,15 +95,18 @@ class UserManagement extends Component {
                 method: 'POST',
                 body: JSON.stringify(user)
         });
-            const data = await response.json();
-            /*if(data && data.length > 0) {
-                this.setState({reports: data, searchResult: data});
-            } else {
-                this.setState({noDataText: 'No reports found!'});
-            }*/
-
+             data = await response.json();
+             console.log(data);
+            if(data) {
+                const currentUsers = this.state.users;
+                currentUsers.unshift(data);
+                this.setState({users: currentUsers, searchedUsers: currentUsers});
+                this.props.notify('Success', 'success', 'User added!');
+            }
+            this.props.manageScreenLoader(false);
         } catch(err){
-            console.log('error in creating user!');
+            this.props.manageScreenLoader(false);
+            this.props.notify('Error', 'error', 'User already exists!');
         }
     }
 

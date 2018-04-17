@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 import GoogleMapReact from 'google-map-react';
+import FaMapMarker from 'react-icons/lib/fa/map-marker';
 
 const MapComponent = ({ text }) => (
-    <div style={{
-        position: 'relative', color: 'white', background: 'purple',
-        height: 18, width: 70
-    }}>
-        {text}
-    </div>
+    <FaMapMarker style={{color: '#FF5733'}} size={20}/>
 );
 
 class Map extends Component {
@@ -20,7 +16,7 @@ class Map extends Component {
     render() {
 const mapComp = this.props.mapData.map(mp=>{
    return (
-       <MapComponent key={mp.lat}
+       <MapComponent key={mp.id}
            lat={mp.lat}
            lng={mp.lng}
            text={mp.name}
@@ -32,7 +28,7 @@ const mapComp = this.props.mapData.map(mp=>{
                 <GoogleMapReact
                     bootstrapURLKeys={{ key: 'AIzaSyCvKqs285DpxtdI8spf2Vi64gFhSE7N4lw' }}
                     defaultCenter={{lat: this.props.mapData[0].lat, lng:this.props.mapData[0].lng }}
-                    defaultZoom={7}
+                    defaultZoom={13}
                 >
                     {mapComp}
                 </GoogleMapReact>

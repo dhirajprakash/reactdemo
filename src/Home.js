@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import './App.css';
-import {Button, Badge, FormGroup, Form, Col, Label} from 'reactstrap';
+import './animate.css';
+import './toastr.css';
+import {Button, Badge, FormGroup, Form, Label} from 'reactstrap';
 import UploadFile from './UploadFile';
 import { withAuth } from '@okta/okta-react';
 import FaArrowCircleORight from 'react-icons/lib/fa/arrow-circle-o-right';
 import UserManagement from './UserManagement';
 import Map from './Map';
+import {ToastContainer} from 'react-toastr';
+import {BeatLoader} from 'react-spinners';
 
 class Home extends Component {
 
@@ -21,8 +25,9 @@ class Home extends Component {
             displayAddUserMenu: false,
             userRole: '',
             mapData: [],
-            displayMapData: []
-        }
+            displayMapData: [],
+            dataProcessing: false
+        };
         this.checkAuthentication = this.checkAuthentication.bind(this);
         this.checkAuthentication();
     }
@@ -41,7 +46,6 @@ class Home extends Component {
     async checkAuthentication() {
         const authenticated = await this.props.auth.isAuthenticated();
         const userInfo = await this.props.auth.getUser();
-        console.log(userInfo);
 
         if (authenticated !== this.state.authenticated) {
             this.setState({ authenticated });
@@ -66,8 +70,36 @@ class Home extends Component {
     }
 
     updateMapData(data) {
-        console.log(data);
         this.setState({mapData: data});
+    }
+
+    openBI() {
+        const win = window.open('https://quicksight.aws.amazon.com', '_blank');
+        win.focus();
+    }
+
+    notify(title, type, message) {
+        if(type === 'error') {
+            this.refs.toastContainer.error(message, title, {
+                closeButton: true
+            })
+        } else if(type === 'success') {
+            this.refs.toastContainer.success(message, title, {
+                closeButton: true
+            })
+        } else if(type === 'info') {
+            this.refs.toastContainer.info(message, title, {
+                closeButton: true
+            })
+        } else if(type === 'warning') {
+            this.refs.toastContainer.warning(message, title, {
+                closeButton: true
+            })
+        }
+    }
+
+    manageScreenLoader(flag) {
+        this.setState({dataProcessing: flag});
     }
 
     render() {
@@ -91,7 +123,10 @@ class Home extends Component {
                         <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
                             <h4><Badge color="info">INTEGRACAODEFORCAS</Badge></h4>
 
-                            <div>
+                            <div className='sweet-loading' style={{display: this.state.dataProcessing ? '' : 'none'}}>
+                                <BeatLoader color={'#ffc107'} size={15} loading={this.state.dataProcessing}/></div>
+
+                            <div className="float-right">
                                 <Badge color="light">{this.state.userName}</Badge>
                                 &nbsp;&nbsp;
                                 <Button size="sm" outline color="warning" onClick={this.props.auth.logout}>Sair</Button>
@@ -104,16 +139,20 @@ class Home extends Component {
                                 <Button outline color="warning" className="mt-1"
                                         onClick={this.manageDisplay.bind(this, 'upload')}>Arquivo Enviado</Button>
                                 <Button outline color="warning" className="mt-1"
-                                        onClick={this.manageDisplay.bind(this, 'report')}>Relatorios</Button>
+                                        onClick={this.manageDisplay.bind(this, 'report')} disabled={this.state.mapData.length === 0}>Mapa</Button>
+                                <Button outline color="warning" className="mt-1">Relatorios</Button>
+                                <Button outline color="warning" className="mt-1"
+                                        onClick={this.openBI.bind(this)}>BI</Button>
                                 <Button outline color="warning" className="mt-1" style={{display: this.state.displayAddUserMenu ? '' : 'none'}}
                                         onClick={this.manageDisplay.bind(this, 'user')}>Gerenciar Usuarios</Button>
+
                             </div>
                         </div>
                         <div className="col-10" style={{display: this.state.displayUpload ? '' : 'none'}}>
-                            <UploadFile updateUser={role=>this.updateUserRole(role)} userId={this.state.userEmail} updateMapData={data=>this.updateMapData(data)} />
+                            <UploadFile manageScreenLoader={flag => this.manageScreenLoader(flag)} updateUser={role=>this.updateUserRole(role)} notify={(title, type, message)  => this.notify(title, type, message)} userId={this.state.userEmail} updateMapData={data=>this.updateMapData(data)} />
                         </div>
                         <div className="col-10" style={{display: this.state.displayUserManagement ? '' : 'none'}}>
-                            <UserManagement userId={this.state.userEmail}/>
+                            <UserManagement manageScreenLoader={flag => this.manageScreenLoader(flag)} userId={this.state.userEmail} notify={(title, type, message)  => this.notify(title, type, message)} />
                         </div>
                         {this.state.displayMapData.length > 0 &&
                             <div className="col-10" style={{display: this.state.displayReport ? '' : 'none'}}>
@@ -127,6 +166,7 @@ class Home extends Component {
 
         return (
           <div>
+              <ToastContainer ref="toastContainer" className="toast-top-right" />
               {template}
           </div>
         );

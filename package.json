@@ -8,6 +8,7 @@
     "bootstrap": "4.0.0-beta.3",
     "google-map-react": "^0.34.0",
     "isomorphic-fetch": "^2.2.1",
+    "moment": "^2.22.0",
     "react": "^16.2.0",
     "react-csv": "^1.0.12",
     "react-dom": "^16.2.0",
@@ -16,10 +17,12 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.0",
+    "react-spinners": "^0.3.2",
     "react-table": "^6.7.6",
     "react-toastr": "^3.0.0",
     "react-transition-group": "^2.2.1",
-    "reactstrap": "^5.0.0-beta"
+    "reactstrap": "^5.0.0-beta",
+    "uuid": "^3.2.1"
   },
   "scripts": {
     "start": "react-scripts start",
