@@ -19,6 +19,8 @@ import Helper from './Helper';
 import uuid from 'uuid';
 import TiDelete from 'react-icons/lib/ti/delete';
 import moment from 'moment';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 class UploadFile extends Component {
 
@@ -35,17 +37,15 @@ class UploadFile extends Component {
             noDataText: 'Loading...',
             mapData: [],
             searchText: '',
-            fromDate: moment().format('dd/mm/yyyy')
+            startDate: moment().subtract(14, "days"),
+            endDate: moment()
         }
 
         this.toggle = this.toggle.bind(this);
         this.searchReports = this.searchReports.bind(this);
         this.clearSearch = this.clearSearch.bind(this);
         this.handleFromDate = this.handleFromDate.bind(this);
-    }
-
-    handleFromDate(val) {
-        this.setState({fromDate: val});
+        this.handleToDate = this.handleToDate.bind(this);
     }
 
     async uploadFiles(files) {
@@ -111,7 +111,7 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-
+            console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false});
@@ -139,7 +139,6 @@ class UploadFile extends Component {
                 name: rpt.pdfDataMap.BoletimNo
             });
         });
-        console.log(coordinates);
         this.setState({mapData: coordinates});
         this.props.updateMapData(coordinates);
     }
@@ -194,6 +193,14 @@ class UploadFile extends Component {
         }
     }
 
+    handleFromDate(date) {
+        this.setState({startDate: date});
+    }
+
+    handleToDate(date) {
+        this.setState({endDate: date});
+    }
+
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -232,9 +239,9 @@ class UploadFile extends Component {
                 accessor: 'dependencia'
             },
             {
-                Header: 'Flagrante',
+                Header: 'Ocorrência',
                 headerClassName: 'bg-secondary',
-                accessor: 'flagrante'
+                accessor: 'data'
             },
             {
                 Header: 'Emitido',
@@ -247,31 +254,48 @@ class UploadFile extends Component {
                 accessor: 'localCrime',
             },
             {
-                Header: 'Uploaded By',
+                Header: 'Flagrante',
                 headerClassName: 'bg-secondary',
-                accessor: 'uploader'
+                accessor: 'flagrante'
             }
         ];
 
         return (
-            <div className="mt-5">
-                <div className="mb-2 row">
-                    <div className="col-4">
-                        <input type="text" name="nmSearch" id="idSearch" placeholder="search..."
-                               onChange={this.searchReports} ref="searchBox"/>
-                        <Badge className="align-top" color="secondary" onClick={this.clearSearch} style={{cursor: 'pointer', height: 30}}>
-                            <TiDelete style={{marginTop: 5}}/></Badge>
-
-                    </div>
-                    {/*<div className="col-4 d-inline-block">
-                        <span className="d-inline-block text-light">Emitido:</span>
-                        <div className="d-inline-block">
-                            <input type="date" name="fromDate" id="fromDate" placeholder="select start of date range" onChange={this.handleFromDate} defaultValue={this.state.fromDate}
+            <div style={{marginTop: '7vh', height: '93vh'}}>
+                <div className="mt-3 mb-2 row">
+                    <div className="col-8 d-inline-block">
+                        <div className="react-datepicker-wrapper">
+                            <div className="react-datepicker__input-container">
+                                <input type="text" name="nmSearch" id="idSearch" placeholder="search..."
+                                       onChange={this.searchReports} ref="searchBox" className="react-datepicker-ignore-onclickoutside" />
+                                <button className="react-datepicker__close-icon" onClick={this.clearSearch}></button>
+                            </div>
+                        </div>
+                    <span className="d-inline-block text-light ml-5">Ocorrência:</span>
+                        <div className="d-inline-block ml-1">
+                        <DatePicker
+                            selected={this.state.startDate}
+                            selectsStart
+                            startDate={this.state.startDate}
+                            endDate={this.state.endDate}
+                            onChange={this.handleFromDate}
+                            isClearable={true}
+                            dateFormat="DD/MM/YYYY"
+                        />
+                        </div>
+                        <div className="d-inline-block ml-1 ">
+                            <DatePicker
+                                selected={this.state.endDate}
+                                selectsEnd
+                                startDate={this.state.startDate}
+                                endDate={this.state.endDate}
+                                onChange={this.handleToDate}
+                                isClearable={true}
+                                dateFormat="DD/MM/YYYY"
                             />
                         </div>
-                    </div>*/}
+                    </div>
                 </div>
-
 
                 <div>
                     <div>
