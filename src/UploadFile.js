@@ -17,10 +17,10 @@ import {withAuth} from '@okta/okta-react';
 import fetch from 'isomorphic-fetch';
 import Helper from './Helper';
 import uuid from 'uuid';
-import TiDelete from 'react-icons/lib/ti/delete';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import FaPlayCircle from 'react-icons/lib/fa/play-circle';
 
 class UploadFile extends Component {
 
@@ -36,16 +36,18 @@ class UploadFile extends Component {
             modalBody: {},
             noDataText: 'Loading...',
             mapData: [],
-            searchText: '',
-            startDate: moment().subtract(14, "days"),
-            endDate: moment()
+            searchText: ''
         }
+
+        this.startDate = moment().subtract(90, "days");
+        this.endDate = moment();
 
         this.toggle = this.toggle.bind(this);
         this.searchReports = this.searchReports.bind(this);
         this.clearSearch = this.clearSearch.bind(this);
         this.handleFromDate = this.handleFromDate.bind(this);
         this.handleToDate = this.handleToDate.bind(this);
+        this.checkDateFilter = this.checkDateFilter.bind(this);
     }
 
     async uploadFiles(files) {
@@ -111,12 +113,12 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-            console.log(data);
+            //console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false});
-                this.getMapCoordinates(data);
-
+                //this.getMapCoordinates(data);
+                this.searchReports();
 
             } else {
                 this.setState({noDataText: 'No reports found!', tableLoading: false});
@@ -149,32 +151,86 @@ class UploadFile extends Component {
         });
     }
 
-    searchReports(e) {
-        const searchText = e.target.value;
+    searchReports() {
+        const searchText = this.refs.searchBox.value;
+        let isTextSearch = false;
+        let isTextFound = false;
+
+        if (searchText != null && searchText.trim() !== '') {
+            isTextSearch = true;
+        }
+
         if (this.state.reports.length > 0) {
             const results = [];
             this.state.reports.map(rpt => {
-                if (rpt.pdfDataMap && rpt.pdfDataMap.RAW_DATA) {
-                    if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
+                isTextFound = false;
+                if (isTextSearch) {
+                    if (rpt.pdfDataMap && rpt.pdfDataMap.RAW_DATA) {
+                        if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
+                            console.log(this.checkDateFilter(rpt));
+                            if (this.checkDateFilter(rpt) === 'Y') {
+                                results.push(rpt);
+                            }
+                        }
+                    }
+                } else {
+                    console.log(this.checkDateFilter(rpt));
+                    if (this.checkDateFilter(rpt) === 'Y') {
                         results.push(rpt);
                     }
                 }
+
+
             });
-            console.log(results);
+            //console.log(results);
             const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
             this.setState({searchResult: results, noDataText: message});
             this.getMapCoordinates(results);
         }
     }
 
+    checkDateFilter(rpt) {
+        let valid = '';
+        try {
+           // console.log(rpt.pdfDataMap.Data.split(' ')[0]);
+            const occurenciaDt = moment(rpt.pdfDataMap.Data.split(' ')[0], 'DD/MM/YYYY');
+            /*console.log(this.startDate);
+            console.log(this.startDate === null);
+            console.log(this.startDate === '');*/
+            if (this.startDate != null && this.startDate !== '') {
+                if (occurenciaDt.isSameOrAfter(this.startDate)) {
+                    valid = 'Y';
+                } else {
+                    valid = 'N';
+                }
+            }
+            //console.log('valid-->'+valid);
+
+            if (valid !== 'N' && this.endDate != null && this.endDate !== '') {
+                if (occurenciaDt.isSameOrBefore(this.endDate)) {
+                    valid = 'Y';
+                } else {
+                    valid = 'N';
+                }
+            }
+            //console.log('valid-->'+valid);
+            valid = valid === '' ? 'Y' : valid;
+        } catch (err) {
+            console.log(err);
+            valid = 'Y';
+        }
+        return valid;
+    }
+
     clearSearch() {
-        this.setState({searchResult: this.state.reports, searchText: ''});
-        this.getMapCoordinates(this.state.reports);
+        this.setState({searchText: ''});
+        this.searchReports();
+        // this.getMapCoordinates(this.state.reports);
         this.refs.searchBox.value = '';
     }
 
     async getReportLink(s3ReportName) {
-        console.log(s3ReportName);
+        //console.log(s3ReportName);
         this.props.manageScreenLoader(true);
         try {
             const response = await fetch(Helper.getAPI() + 'reports/link?fileName=' + s3ReportName, {
@@ -194,11 +250,35 @@ class UploadFile extends Component {
     }
 
     handleFromDate(date) {
-        this.setState({startDate: date});
+        if(date !== null) {
+        if (moment(date).isAfter(moment(this.endDate).subtract(1, 'd'))) {
+            this.props.notify('Warning', 'warning', 'Select From Date earlier than To Date.');
+            return false;
+        }
+        if (moment(date).isAfter(moment())) {
+            this.props.notify('Warning', 'warning', 'Select valid Date.');
+            return false;
+        }
+    }
+        this.startDate = date;
+        this.searchReports();
+
     }
 
     handleToDate(date) {
-        this.setState({endDate: date});
+        if(date !== null) {
+        if (moment(date).isBefore(moment(this.startDate).add(1, 'd'))) {
+            this.props.notify('Warning', 'warning', 'Select To Date later than From Date.');
+            return false;
+        }
+        if (moment(date).isAfter(moment())) {
+            this.props.notify('Warning', 'warning', 'Select valid Date.');
+            return false;
+        }
+    }
+        this.endDate = date;
+        this.searchReports();
+
     }
 
     render() {
@@ -266,35 +346,38 @@ class UploadFile extends Component {
                     <div className="col-8 d-inline-block">
                         <div className="react-datepicker-wrapper">
                             <div className="react-datepicker__input-container">
-                                <input type="text" name="nmSearch" id="idSearch" placeholder="search..."
-                                       onChange={this.searchReports} ref="searchBox" className="react-datepicker-ignore-onclickoutside" />
+                                <input type="text" name="nmSearch" id="idSearch" placeholder="pesquisa boletim..."
+                                       onChange={this.searchReports} ref="searchBox"
+                                       className="react-datepicker-ignore-onclickoutside"/>
                                 <button className="react-datepicker__close-icon" onClick={this.clearSearch}></button>
                             </div>
                         </div>
-                    <span className="d-inline-block text-light ml-5">Ocorrência:</span>
+                        <span className="d-inline-block text-light ml-3">Ocorrência:</span>
                         <div className="d-inline-block ml-1">
-                        <DatePicker
-                            selected={this.state.startDate}
-                            selectsStart
-                            startDate={this.state.startDate}
-                            endDate={this.state.endDate}
-                            onChange={this.handleFromDate}
-                            isClearable={true}
-                            dateFormat="DD/MM/YYYY"
-                        />
+                            <DatePicker
+                                selected={this.startDate}
+                                selectsStart
+                                startDate={this.startDate}
+                                endDate={this.endDate}
+                                onChange={this.handleFromDate}
+                                isClearable={true}
+                                dateFormat="DD/MM/YYYY"
+                            />
                         </div>
                         <div className="d-inline-block ml-1 ">
                             <DatePicker
-                                selected={this.state.endDate}
+                                selected={this.endDate}
                                 selectsEnd
-                                startDate={this.state.startDate}
-                                endDate={this.state.endDate}
+                                startDate={this.startDate}
+                                endDate={this.endDate}
                                 onChange={this.handleToDate}
                                 isClearable={true}
                                 dateFormat="DD/MM/YYYY"
                             />
                         </div>
                     </div>
+                    {/*<div className="d-inline-block ml-1" style={{marginTop: -8}}><h2 onClick={this.applyFilter}>
+                        <FaPlayCircle style={{color: '#ffc107', cursor: 'pointer'}}/></h2></div>*/}
                 </div>
 
                 <div>
@@ -320,6 +403,7 @@ class UploadFile extends Component {
                                 columns={columns}
                                 data={data}
                                 defaultPageSize={10}
+                                sortable={false}
                                 noDataText={this.state.noDataText}
                                 className="-striped -highlight bg-dark text-light"
                             />
@@ -360,7 +444,7 @@ class UploadFile extends Component {
                     </div>
                 </div>
 
-                <Modal isOpen={this.state.modal} toggle={this.toggle} size="lg" centered>
+                <Modal isOpen={this.state.modal} toggle={this.toggle} size="lg" centered="true">
                     <ModalHeader toggle={this.toggle}>Boletim: {this.state.modalTitle}</ModalHeader>
                     <ModalBody>
                         <div>

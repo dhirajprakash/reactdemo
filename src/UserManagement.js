@@ -138,8 +138,8 @@ class UserManagement extends Component {
         ];
         return (
             <div className="mt-5">
-                <h5><Badge color="light">Adicionar Usuarios</Badge></h5>
-                <br/>
+                {/*<h6><Badge color="light">Adicionar Usuarios</Badge></h6>
+                <br/>*/}
                 <div style={{border:'0px solid grey'}}>
                     <Form>
                         <FormGroup row className="mt-2 ml-2 mr-2">
