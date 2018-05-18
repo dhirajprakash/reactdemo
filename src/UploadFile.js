@@ -20,7 +20,8 @@ import uuid from 'uuid';
 import moment from 'moment';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import FaPlayCircle from 'react-icons/lib/fa/play-circle';
+import FaExclamationTriangle from 'react-icons/lib/fa/exclamation-triangle';
+import FaExclamationCircle from 'react-icons/lib/fa/exclamation-circle';
 
 class UploadFile extends Component {
 
@@ -32,17 +33,20 @@ class UploadFile extends Component {
             reports: [],
             searchResult: [],
             modal: false,
+            uploadStatusModal: false,
             modalTitle: '',
             modalBody: {},
             noDataText: 'Loading...',
             mapData: [],
-            searchText: ''
+            searchText: '',
+            uploadFilesReturnedFromServer: []
         }
 
         this.startDate = moment().subtract(90, "days");
         this.endDate = moment();
 
         this.toggle = this.toggle.bind(this);
+        this.uploadStatusToggle = this.uploadStatusToggle.bind(this);
         this.searchReports = this.searchReports.bind(this);
         this.clearSearch = this.clearSearch.bind(this);
         this.handleFromDate = this.handleFromDate.bind(this);
@@ -62,7 +66,7 @@ class UploadFile extends Component {
         if (totalSize > 20480000) {
             return false;
         }
-        this.setState({files: files, uploadInProgress: true});
+        this.setState({files: files, uploadInProgress: true, uploadStatusModal:true});
 
         try {
             const response = await fetch(Helper.getAPI() + 'reports/upload', {
@@ -88,13 +92,31 @@ class UploadFile extends Component {
                     uploadedReports.push(this.state.reports[i]);
                 }
             }
+
+            let errorOnUpload = false;
+            console.log(data);
             data.map(rpt => {
-                uploadedReports.unshift(rpt);
+                if(rpt.pdfDataMap.PARSE_ERROR) {
+                    errorOnUpload = true;
+                }
+                if(!rpt.pdfDataMap.OTHER_USER) {
+                    uploadedReports.unshift(rpt);
+                }
             });
-            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false});
-            this.props.notify('Success', 'success', 'files uploaded!');
+            this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false, uploadFilesReturnedFromServer: data});
+
+            console.log(data.length);
+            if(errorOnUpload && data.length === 1) {
+                this.props.notify('Error', 'error', 'Error while uploading file!');
+            } else if(errorOnUpload) {
+                this.props.notify('Warning', 'warning', 'Few errors encountered while uploading files! Please refer status.');
+            } else {
+                this.props.notify('Success', 'success', 'files uploaded!');
+            }
             this.props.manageScreenLoader(false);
             this.getMapCoordinates(uploadedReports);
+
+            console.log(uploadedReports);
 
         } catch (err) {
             console.log(err);
@@ -148,6 +170,11 @@ class UploadFile extends Component {
     toggle() {
         this.setState({
             modal: !this.state.modal
+        });
+    }
+    uploadStatusToggle() {
+        this.setState({
+            uploadStatusModal: !this.state.uploadStatusModal
         });
     }
 
@@ -340,6 +367,44 @@ class UploadFile extends Component {
             }
         ];
 
+        let uploadInProgressData = '';
+        if(this.state.uploadInProgress) {
+            uploadInProgressData = this.state.files.map(f =>
+                <tr key={f.name}>
+                    <td>
+                        {f.name}
+                    </td>
+                    <td colSpan="2" align="center">
+                        <div className="File-loader mt-1"></div>
+                    </td>
+                </tr>
+            );
+        } else {
+            let keys = '';
+            uploadInProgressData = this.state.uploadFilesReturnedFromServer.map(f =>
+                 <tr key={f.reportS3Link}>
+                    <td>
+                        {f.reportS3Link}
+                    </td>
+                    <td style={{display: f.pdfDataMap.OTHER_USER ? 'none' : ''}}>
+                        Failed to extract <b>{f.pdfDataMap.FAILED_KEYS.map(k => {return (k + '  ')})}</b>
+                    </td>
+                    <td style={{display: f.pdfDataMap.OTHER_USER ? '' : 'none'}}>
+                        Already uploaded by other user.
+                    </td>
+                    <td style={{display: f.pdfDataMap.PARSE_ERROR ? 'none' : ''}}>
+                        <FaCheck style={{color: 'green'}}/>
+                    </td>
+                    <td style={{display: f.pdfDataMap.OTHER_USER ? '' : 'none'}}>
+                        <FaExclamationCircle style={{color: 'red'}}/>
+                    </td>
+                    <td style={{display: (f.pdfDataMap.PARSE_ERROR && !f.pdfDataMap.OTHER_USER) ? '' : 'none'}}>
+                        <FaExclamationTriangle style={{color: 'orange'}}/>
+                    </td>
+                </tr>
+            );
+        }
+
         return (
             <div style={{marginTop: '7vh', height: '93vh'}}>
                 <div className="mt-3 mb-2 row">
@@ -349,7 +414,7 @@ class UploadFile extends Component {
                                 <input type="text" name="nmSearch" id="idSearch" placeholder="pesquisa boletim..."
                                        onChange={this.searchReports} ref="searchBox"
                                        className="react-datepicker-ignore-onclickoutside"/>
-                                <button className="react-datepicker__close-icon" onClick={this.clearSearch}></button>
+                                {/*<button className="react-datepicker__close-icon" onClick={this.clearSearch}></button>*/}
                             </div>
                         </div>
                         <span className="d-inline-block text-light ml-3">Ocorrência:</span>
@@ -421,24 +486,11 @@ class UploadFile extends Component {
                                     </Dropzone>
                                 </div>
                             </div>
-                            <div className="col-4 ml-5" style={{height: '13vh', overflow: 'auto'}}>
-                                <ul>
-                                    {
-                                        this.state.files.map(f => <div key={f.name} className="row mt-2"><Badge
-                                            key={f.name}
-                                            className="badge-secondary btn-block"
-                                            style={{width: '80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ?
-                                            <div className="File-loader mt-1"></div> :
-                                            <FaCheck style={{color: 'green'}}/>}
-                                        </div>)
-                                    }
-                                </ul>
-                            </div>
-                            <div className="col-4" align="right">
-                    <span>
-                        <CSVLink data={data} filename="Boletim.csv"><Button outline
-                                                                            color="warning">CSV ⬇</Button></CSVLink>
-                    </span>
+
+                            <div className="col-9" align="right">
+                                <span>
+                                    <CSVLink data={data} filename="Boletim.csv"><Button outline color="warning">CSV ⬇</Button></CSVLink>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -483,6 +535,42 @@ class UploadFile extends Component {
                     </ModalBody>
                     <ModalFooter>
                         <Button color="secondary" onClick={this.toggle}>Fechar</Button>
+                    </ModalFooter>
+                </Modal>
+
+                <Modal isOpen={this.state.uploadStatusModal} centered="true">
+                    <ModalBody>
+                        {/*<ul>
+                            {
+                                this.state.files.map(f => <div key={f.name} className="row mt-2"><Badge
+                                    key={f.name}
+                                    className="badge-secondary btn-block"
+                                    style={{width: '80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ?
+                                    <div className="File-loader mt-1"></div> :
+                                    <FaCheck style={{color: 'green'}}/>}
+                                </div>)
+                            }
+                        </ul>*/}
+                        <table className="table-bordered table-striped font-menu-button" style={{width: '100%'}}>
+                            <tbody>
+                                <tr className="bg-info">
+                                    <td style={{width: '50%'}}>
+                                        File Name
+                                    </td>
+                                    <td style={{width: '35%'}}>
+                                        &nbsp;
+                                    </td>
+                                    <td style={{width: '15%'}}>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                {uploadInProgressData}
+                            </tbody>
+                        </table>
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="secondary" onClick={this.uploadStatusToggle} disabled={this.state.uploadInProgress}>Fechar</Button>
                     </ModalFooter>
                 </Modal>
             </div>
