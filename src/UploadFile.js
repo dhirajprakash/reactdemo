@@ -115,11 +115,11 @@ class UploadFile extends Component {
             this.props.updateChartData(uploadedReports);
             this.getMapCoordinates(uploadedReports);
 
-
         } catch (err) {
             console.log(err);
             this.props.notify('Error', 'error', 'upload failed. Contact support team!');
             this.props.manageScreenLoader(false);
+            this.setState({uploadInProgress: false});
         }
     }
 
