@@ -11,7 +11,6 @@ class Map extends Component {
 
     constructor(props) {
         super(props);
-        console.log(props.mapData);
     }
     render() {
 const mapComp = this.props.mapData.map(mp=>{

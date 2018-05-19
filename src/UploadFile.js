@@ -94,7 +94,6 @@ class UploadFile extends Component {
             }
 
             let errorOnUpload = false;
-            console.log(data);
             data.map(rpt => {
                 if(rpt.pdfDataMap.PARSE_ERROR) {
                     errorOnUpload = true;
@@ -105,7 +104,6 @@ class UploadFile extends Component {
             });
             this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false, uploadFilesReturnedFromServer: data});
 
-            console.log(data.length);
             if(errorOnUpload && data.length === 1) {
                 this.props.notify('Error', 'error', 'Error while uploading file!');
             } else if(errorOnUpload) {
@@ -114,9 +112,9 @@ class UploadFile extends Component {
                 this.props.notify('Success', 'success', 'files uploaded!');
             }
             this.props.manageScreenLoader(false);
+            this.props.updateChartData(uploadedReports);
             this.getMapCoordinates(uploadedReports);
 
-            console.log(uploadedReports);
 
         } catch (err) {
             console.log(err);
@@ -194,14 +192,14 @@ class UploadFile extends Component {
                 if (isTextSearch) {
                     if (rpt.pdfDataMap && rpt.pdfDataMap.RAW_DATA) {
                         if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
-                            console.log(this.checkDateFilter(rpt));
+                            //console.log(this.checkDateFilter(rpt));
                             if (this.checkDateFilter(rpt) === 'Y') {
                                 results.push(rpt);
                             }
                         }
                     }
                 } else {
-                    console.log(this.checkDateFilter(rpt));
+                    //console.log(this.checkDateFilter(rpt));
                     if (this.checkDateFilter(rpt) === 'Y') {
                         results.push(rpt);
                     }
@@ -213,6 +211,7 @@ class UploadFile extends Component {
             const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
             this.setState({searchResult: results, noDataText: message});
             this.getMapCoordinates(results);
+            this.props.updateChartData(results);
         }
     }
 

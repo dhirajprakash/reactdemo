@@ -10,6 +10,7 @@ import UserManagement from './UserManagement';
 import Map from './Map';
 import {ToastContainer} from 'react-toastr';
 import {BeatLoader} from 'react-spinners';
+import Charts from "./Charts";
 
 class Home extends Component {
 
@@ -23,10 +24,12 @@ class Home extends Component {
             userName: '',
             userEmail: '',
             displayAddUserMenu: false,
+            displayChart: false,
             userRole: '',
             mapData: [],
             displayMapData: [],
-            dataProcessing: false
+            dataProcessing: false,
+            chartData: []
         };
         this.checkAuthentication = this.checkAuthentication.bind(this);
         this.checkAuthentication();
@@ -40,6 +43,9 @@ class Home extends Component {
         }
         else if(component === 'user') {
             this.setState({displayReport: false, displayUpload: false, displayUserManagement: true});
+        }
+        else if(component === 'chart') {
+            this.setState({displayReport: false, displayUpload: false, displayUserManagement: false, displayChart: true});
         }
     }
 
@@ -71,6 +77,10 @@ class Home extends Component {
 
     updateMapData(data) {
         this.setState({mapData: data});
+    }
+
+    updateChartData(reports) {
+        this.setState({chartData: reports});
     }
 
     openBI() {
@@ -140,7 +150,8 @@ class Home extends Component {
                                         onClick={this.manageDisplay.bind(this, 'upload')}>Arquivo Enviado</Button>
                                 <Button outline color="warning" className="mt-1"
                                         onClick={this.manageDisplay.bind(this, 'report')} disabled={this.state.mapData.length === 0}>Mapa</Button>
-                                <Button outline color="warning" className="mt-1">Relatorios</Button>
+                                <Button outline color="warning" className="mt-1" onClick={this.manageDisplay.bind(this, 'chart')}
+                                        disabled={this.state.chartData.length === 0}>Relatorios</Button>
                                 <Button outline color="warning" className="mt-1"
                                         onClick={this.openBI.bind(this)}>BI</Button>
                                 <Button outline color="warning" className="mt-1" style={{display: this.state.displayAddUserMenu ? '' : 'none'}}
@@ -149,7 +160,9 @@ class Home extends Component {
                             </div>
                         </div>
                         <div className="col-10" style={{display: this.state.displayUpload ? '' : 'none'}}>
-                            <UploadFile manageScreenLoader={flag => this.manageScreenLoader(flag)} updateUser={role=>this.updateUserRole(role)} notify={(title, type, message)  => this.notify(title, type, message)} userId={this.state.userEmail} updateMapData={data=>this.updateMapData(data)} />
+                            <UploadFile manageScreenLoader={flag => this.manageScreenLoader(flag)}
+                                        updateUser={role=>this.updateUserRole(role)} notify={(title, type, message)  => this.notify(title, type, message)}
+                                        userId={this.state.userEmail} updateMapData={data=>this.updateMapData(data)} updateChartData={reports => this.updateChartData(reports)} />
                         </div>
                         <div className="col-10" style={{display: this.state.displayUserManagement ? '' : 'none'}}>
                             <UserManagement manageScreenLoader={flag => this.manageScreenLoader(flag)} userId={this.state.userEmail} notify={(title, type, message)  => this.notify(title, type, message)} />
@@ -159,6 +172,10 @@ class Home extends Component {
                                 <Map mapData={this.state.displayMapData}/>
                             </div>
                         }
+
+                        <div className="col-10" style={{display: this.state.displayChart ? '' : 'none'}}>
+                            <Charts chartData={this.state.chartData} />
+                        </div>
                     </div>
                 </div>
             ;
