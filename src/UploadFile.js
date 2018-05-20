@@ -405,7 +405,7 @@ class UploadFile extends Component {
         }
 
         return (
-            <div style={{marginTop: '7vh', height: '93vh'}}>
+            <div style={{marginTop: '7vh', height: '93vh'}} className="font-common">
                 <div className="mt-3 mb-2 row">
                     <div className="col-8 d-inline-block">
                         <div className="react-datepicker-wrapper">
@@ -496,7 +496,7 @@ class UploadFile extends Component {
                     </div>
                 </div>
 
-                <Modal isOpen={this.state.modal} toggle={this.toggle} size="lg" centered="true">
+                <Modal className="font-common" isOpen={this.state.modal} toggle={this.toggle} size="lg" centered="true">
                     <ModalHeader toggle={this.toggle}>Boletim: {this.state.modalTitle}</ModalHeader>
                     <ModalBody>
                         <div>
@@ -539,19 +539,8 @@ class UploadFile extends Component {
                 </Modal>
 
                 <Modal isOpen={this.state.uploadStatusModal} centered="true">
-                    <ModalBody>
-                        {/*<ul>
-                            {
-                                this.state.files.map(f => <div key={f.name} className="row mt-2"><Badge
-                                    key={f.name}
-                                    className="badge-secondary btn-block"
-                                    style={{width: '80%'}}>{f.name}</Badge>&nbsp;&nbsp;{this.state.uploadInProgress ?
-                                    <div className="File-loader mt-1"></div> :
-                                    <FaCheck style={{color: 'green'}}/>}
-                                </div>)
-                            }
-                        </ul>*/}
-                        <table className="table-bordered table-striped font-menu-button" style={{width: '100%'}}>
+                    <ModalBody className="font-common">
+                        <table className="table-bordered table-striped" style={{width: '100%'}}>
                             <tbody>
                                 <tr className="bg-info">
                                     <td style={{width: '50%'}}>

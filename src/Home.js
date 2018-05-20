@@ -117,7 +117,7 @@ class Home extends Component {
         let template;
 
         if(!this.state.authenticated ){
-            template = <div className="App-home container-fluid">
+            template = <div className="App-home container-fluid font-common">
                 <br/><br/>
                 <Form onSubmit={this.handleSubmit}  style={{marginLeft:'30vw', marginTop:'20vh'}}>
                     <FormGroup row>
@@ -128,7 +128,7 @@ class Home extends Component {
             </div>;
         } else if(this.state.authenticated) {
             template =
-                <div className="App container-fluid">
+                <div className="App container-fluid font-common">
                     <div className="row">
                         <nav className="navbar navbar-dark bg-dark fixed-top" style={{height: '6vh'}}>
                             <h4><Badge color="info">INTEGRACAODEFORCAS</Badge></h4>

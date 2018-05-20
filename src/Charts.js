@@ -17,6 +17,7 @@ class Charts extends Component {
         let manhaCount = 0;
         let tardeCount = 0;
         let noiteCount = 0;
+        let incertaCount = 0;
 
         let sundayCount = 0;
         let mondayCount = 0;
@@ -36,6 +37,8 @@ class Charts extends Component {
                     tardeCount++;
                 }else if(rpt.pdfDataMap.OCCURENCIA_TIME === 'NOITE'){
                     noiteCount++;
+                } else {
+                    incertaCount++;
                 }
 
                 switch(rpt.pdfDataMap.OCCURENCIA_DAY) {
@@ -70,34 +73,37 @@ class Charts extends Component {
                 'MADRUGADA',
                 'MANHA',
                 'TARDE',
-                'NOITE'
+                'NOITE',
+                'INCERTA'
             ],
             datasets: [{
-                data: [madrugadaCount, manhaCount, tardeCount, noiteCount],
+                data: [madrugadaCount, manhaCount, tardeCount, noiteCount, incertaCount],
                 backgroundColor: [
                     '#FF6384',
                     '#36A2EB',
                     '#FFCE56',
-                    '#7DCEA0'
+                    '#7DCEA0',
+                    '#AEB6BF'
                 ],
                 hoverBackgroundColor: [
                     '#FF6384',
                     '#36A2EB',
                     '#FFCE56',
-                    '#7DCEA0'
+                    '#7DCEA0',
+                    '#AEB6BF'
                 ]
             }]
         };
 
         const weekdayData = {
             labels: [
-                'SUNDAY',
-                'MONDAY',
-                'TUESDAY',
-                'WEDNESDAY',
-                'THURSDAY',
-                'FRIDAY',
-                'SATURDAY'
+                'DOMINGO',
+                'SEGUNDA',
+                'TERÇA',
+                'QUARTA',
+                'QUINTA',
+                'SEXTA',
+                'SÁBADO'
             ],
             datasets: [{
                 data: [sundayCount, mondayCount, tuesdayCount, wednesdayCount, thursdayCount, fridayCount, saturdayCount],
@@ -126,12 +132,16 @@ class Charts extends Component {
                 <div className="row mt-5">
                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
                         <Doughnut data={data} />
+                        <div style={{marginLeft: '18%'}} >
                         <Badge className="ml-5 mt-5" color="primary">Crime distribution By Time Of Day</Badge>
+                        </div>
                     </div>
 
                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
                         <Doughnut data={weekdayData} />
+                        <div style={{marginLeft: '18%'}} >
                         <Badge className="ml-5 mt-5" color="primary">Crime distribution By Weekday</Badge>
+                        </div>
                     </div>
                 </div>
             </div>

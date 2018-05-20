@@ -46,6 +46,11 @@
     animation: File-loader-spin 2s linear infinite;
 }
 
+.font-common {
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: small;
+}
+
 /* Safari */
 @-webkit-keyframes File-loader-spin {
     0% { -webkit-transform: rotate(0deg); }
