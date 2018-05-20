@@ -37,12 +37,12 @@ class Home extends Component {
 
     manageDisplay(component) {
         if (component === 'report'){
-            this.setState({displayReport: true, displayUpload: false, displayUserManagement: false, displayMapData: this.state.mapData});
+            this.setState({displayReport: true, displayUpload: false, displayUserManagement: false, displayMapData: this.state.mapData, displayChart: false});
         } else if(component === 'upload') {
-            this.setState({displayReport: false, displayUpload: true, displayUserManagement: false});
+            this.setState({displayReport: false, displayUpload: true, displayUserManagement: false, displayChart: false});
         }
         else if(component === 'user') {
-            this.setState({displayReport: false, displayUpload: false, displayUserManagement: true});
+            this.setState({displayReport: false, displayUpload: false, displayUserManagement: true, displayChart: false});
         }
         else if(component === 'chart') {
             this.setState({displayReport: false, displayUpload: false, displayUserManagement: false, displayChart: true});

@@ -123,7 +123,7 @@ class Charts extends Component {
         };
         return (
             <div className="mt-5">
-                <div className="row">
+                <div className="row mt-5">
                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
                         <Doughnut data={data} />
                         <Badge className="ml-5 mt-5" color="primary">Crime distribution By Time Of Day</Badge>
