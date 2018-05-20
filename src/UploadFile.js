@@ -468,6 +468,7 @@ class UploadFile extends Component {
                                 data={data}
                                 defaultPageSize={10}
                                 sortable={false}
+                                resizable={false}
                                 noDataText={this.state.noDataText}
                                 className="-striped -highlight bg-dark text-light"
                             />
