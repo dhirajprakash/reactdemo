@@ -39,7 +39,8 @@ class UploadFile extends Component {
             noDataText: 'Loading...',
             mapData: [],
             searchText: '',
-            uploadFilesReturnedFromServer: []
+            uploadFilesReturnedFromServer: [],
+            userRole: ''
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -136,7 +137,7 @@ class UploadFile extends Component {
             //console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
-                this.setState({reports: data, searchResult: data, tableLoading: false});
+                this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
                 //this.getMapCoordinates(data);
                 this.searchReports();
 
@@ -487,7 +488,7 @@ class UploadFile extends Component {
                                 </div>
                             </div>
 
-                            <div className="col-9" align="right">
+                            <div className="col-9" align="right" style={{display: this.state.userRole == 'SUPER_ADMIN' ? '' : 'none'}}>
                                 <span>
                                     <CSVLink data={data} filename="Boletim.csv"><Button outline color="warning">CSV ⬇</Button></CSVLink>
                                 </span>
@@ -501,7 +502,7 @@ class UploadFile extends Component {
                     <ModalBody>
                         <div>
                             <Badge color="primary">Data:</Badge>
-                            <Button outline color="primary" size="sm" className="float-right"
+                            <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole == 'SUPER_ADMIN' ? '' : 'none'}}
                                     onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View
                                 Report</Button>
                             <p>{this.state.modalBody.data}</p>
