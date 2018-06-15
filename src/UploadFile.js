@@ -387,7 +387,9 @@ class UploadFile extends Component {
                         {f.reportS3Link}
                     </td>
                     <td style={{display: f.pdfDataMap.OTHER_USER ? 'none' : ''}}>
-                        Failed to extract <b>{f.pdfDataMap.FAILED_KEYS.map(k => {return (k + '  ')})}</b>
+                   
+                        Pendencia em {f.pdfDataMap.FAILED_KEYS.length} chaves <b>{f.pdfDataMap.FAILED_KEYS.map(k => {return (k + '  ')})}</b>
+                    
                     </td>
                     <td style={{display: f.pdfDataMap.OTHER_USER ? '' : 'none'}}>
                         Already uploaded by other user.
