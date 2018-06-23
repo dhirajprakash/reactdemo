@@ -382,17 +382,17 @@ class UploadFile extends Component {
         } else {
             let keys = '';
             uploadInProgressData = this.state.uploadFilesReturnedFromServer.map(f =>
-                 <tr key={f.reportS3Link}>
+                <tr key={f.reportS3Link}>
                     <td>
                         {f.reportS3Link}
                     </td>
-                    <td style={{display: f.pdfDataMap.OTHER_USER ? 'none' : ''}}>
-                        Failed to extract <b>{f.pdfDataMap.FAILED_KEYS.map(k => {return (k + '  ')})}</b>
+                    <td style={{display: f.pdfDataMap.FAILED_KEYS.length > 0 ? '' : 'none'}}>
+                        Falha ao extrair<b>{f.pdfDataMap.FAILED_KEYS.map(k => {return (k + '  ')})}</b>
                     </td>
                     <td style={{display: f.pdfDataMap.OTHER_USER ? '' : 'none'}}>
-                        Already uploaded by other user.
+                        Já carregado por outro usuário.
                     </td>
-                    <td style={{display: f.pdfDataMap.PARSE_ERROR ? 'none' : ''}}>
+                    <td colSpan="2" align="center" style={{display: f.pdfDataMap.PARSE_ERROR ? 'none' : ''}}>
                         <FaCheck style={{color: 'green'}}/>
                     </td>
                     <td style={{display: f.pdfDataMap.OTHER_USER ? '' : 'none'}}>
