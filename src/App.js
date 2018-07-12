@@ -17,6 +17,8 @@ const config = {
     client_id: Helper.getClientId()
 }
 
+
+
 class App extends Component {
 
   render() {
