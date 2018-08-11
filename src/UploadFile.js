@@ -6,7 +6,8 @@ import {
     ModalBody,
     ModalFooter,
     Badge,
-    Button
+    Button,
+    Tooltip
 } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
@@ -22,6 +23,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import FaExclamationTriangle from 'react-icons/lib/fa/exclamation-triangle';
 import FaExclamationCircle from 'react-icons/lib/fa/exclamation-circle';
+import FaEdit from 'react-icons/lib/fa/edit';
+import FaTimesCircle from 'react-icons/lib/fa/times-circle';
 
 class UploadFile extends Component {
 
@@ -40,7 +43,10 @@ class UploadFile extends Component {
             mapData: [],
             searchText: '',
             uploadFilesReturnedFromServer: [],
-            userRole: ''
+            userRole: '',
+            reportEditMode: false,
+            editTooltipOpen: false,
+            cancelEditTooltipOpen: false
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -168,9 +174,18 @@ class UploadFile extends Component {
 
     toggle() {
         this.setState({
-            modal: !this.state.modal
+            modal: !this.state.modal,
+            reportEditMode: false
         });
     }
+
+    submitUserInput() {
+        this.setState({
+            modal: !this.state.modal,
+            reportEditMode: false
+        });
+    }
+
     uploadStatusToggle() {
         this.setState({
             uploadStatusModal: !this.state.uploadStatusModal
@@ -306,6 +321,16 @@ class UploadFile extends Component {
         this.endDate = date;
         this.searchReports();
 
+    }
+
+    editReportDetail() {
+        this.setState({reportEditMode: !this.state.reportEditMode, editTooltipOpen: !this.state.editTooltipOpen, cancelEditTooltipOpen: !this.state.cancelEditTooltipOpen});
+    }
+    toggleEditTooltip() {
+        this.setState({editTooltipOpen: !this.state.editTooltipOpen});
+    }
+    toggleCancelEditTooltip() {
+        this.setState({cancelEditTooltipOpen: !this.state.cancelEditTooltipOpen});
     }
 
     render() {
@@ -498,8 +523,18 @@ class UploadFile extends Component {
                 </div>
 
                 <Modal className="font-common" isOpen={this.state.modal} toggle={this.toggle} size="lg" centered="true">
-                    <ModalHeader toggle={this.toggle}>Boletim: {this.state.modalTitle}</ModalHeader>
-                    <ModalBody>
+                    <ModalHeader toggle={this.toggle}>
+                        Boletim: {this.state.modalTitle}&nbsp;
+                        <FaEdit className="edit-icon" id="editReportIcon" style={{cursor: 'Pointer', marginLeft: 10, marginTop: -5, display: this.state.reportEditMode ? 'none' : ''}} onClick={this.editReportDetail.bind(this)} />
+                        <Tooltip placement="right" delay={{ show: 200, hide: 0 }} isOpen={this.state.editTooltipOpen} target="editReportIcon" toggle={this.toggleEditTooltip.bind(this)}>
+                            Editar detalhes do arquivo!
+                        </Tooltip>
+                        <FaTimesCircle className="edit-icon" id="cancelEditReportIcon" style={{cursor: 'Pointer', marginLeft: 10, marginTop: -5, display: this.state.reportEditMode ? '' : 'none'}} onClick={this.editReportDetail.bind(this)} />
+                        <Tooltip placement="right" delay={{ show: 200, hide: 0 }} isOpen={this.state.cancelEditTooltipOpen} target="cancelEditReportIcon" toggle={this.toggleCancelEditTooltip.bind(this)}>
+                            cancelar a edição
+                        </Tooltip>
+                    </ModalHeader>
+                    <ModalBody style={{display: this.state.reportEditMode ? 'none' : ''}}>
                         <div>
                             <Badge color="primary">Data:</Badge>
                             <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole === 'SUPER_ADMIN' ? '' : 'none'}}
@@ -534,8 +569,45 @@ class UploadFile extends Component {
                         </div>
 
                     </ModalBody>
+                    <ModalBody style={{display: this.state.reportEditMode ? '' : 'none'}}>
+                        {/*<div>
+                            <Badge color="primary">Data:</Badge>
+                            <p>{this.state.modalBody.data}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Emitido:</Badge>
+                            <p>{this.state.modalBody.emitido}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">LocalCrime:</Badge>
+                            <p>{this.state.modalBody.localCrime}</p>
+                        </div>*/}
+                        <div className="form-group">
+                            <Badge color="primary">Dependencia:</Badge>
+                            <br/>
+                            <input ref="userInput_Dependencia" className="form-control mt-1" defaultValue={this.state.modalBody.dependencia}/>
+                        </div>
+                        <div className="form-group">
+                            <Badge color="primary">Flagrante:</Badge>
+                            <select ref="userInput_Flagrante" className="form-control mt-1" defaultValue={this.state.modalBody.flagrante}>
+                                <option value="Sim" selected={this.state.modalBody.flagrante == 'Sim'}>Sim</option>
+                                <option value="Nao" selected={this.state.modalBody.flagrante != 'Sim'}>Nao</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Histórico:</Badge>
+                            <p>{this.state.modalBody.history}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Enviado por:</Badge>
+                            <p>{this.state.modalBody.uploader}</p>
+                        </div>
+
+                    </ModalBody>
                     <ModalFooter>
                         <Button color="secondary" onClick={this.toggle}>Fechar</Button>
+                        <Button color="warning" outline style={{display: this.state.reportEditMode ? '' : 'none'}} onClick={this.submitUserInput.bind(this)}>Enviar</Button>
                     </ModalFooter>
                 </Modal>
 
