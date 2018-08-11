@@ -7,7 +7,8 @@ import {
     ModalFooter,
     Badge,
     Button,
-    Tooltip
+    Tooltip,
+    Collapse
 } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
@@ -25,6 +26,8 @@ import FaExclamationTriangle from 'react-icons/lib/fa/exclamation-triangle';
 import FaExclamationCircle from 'react-icons/lib/fa/exclamation-circle';
 import FaEdit from 'react-icons/lib/fa/edit';
 import FaTimesCircle from 'react-icons/lib/fa/times-circle';
+import FaAngleUp from 'react-icons/lib/fa/angle-double-up';
+import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
 
 class UploadFile extends Component {
 
@@ -46,7 +49,8 @@ class UploadFile extends Component {
             userRole: '',
             reportEditMode: false,
             editTooltipOpen: false,
-            cancelEditTooltipOpen: false
+            cancelEditTooltipOpen: false,
+            historyMinimized: false
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -175,15 +179,13 @@ class UploadFile extends Component {
     toggle() {
         this.setState({
             modal: !this.state.modal,
-            reportEditMode: false
+            reportEditMode: false,
+            historyMinimized: false
         });
     }
 
     submitUserInput() {
-        this.setState({
-            modal: !this.state.modal,
-            reportEditMode: false
-        });
+        this.toggle();
     }
 
     uploadStatusToggle() {
@@ -332,7 +334,9 @@ class UploadFile extends Component {
     toggleCancelEditTooltip() {
         this.setState({cancelEditTooltipOpen: !this.state.cancelEditTooltipOpen});
     }
-
+    toggleHistoryView() {
+        this.setState({historyMinimized: !this.state.historyMinimized});
+    }
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -597,17 +601,37 @@ class UploadFile extends Component {
 
                         <div className="form-group">
                             <Badge color="primary">Histórico:</Badge>
-                            <p>{this.state.modalBody.history}</p>
+                            <FaAngleUp style={{display: this.state.historyMinimized ? 'none' : '', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
+                            <FaAngleDown style={{display: this.state.historyMinimized ? '' : 'none', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
+                            <Collapse isOpen={!this.state.historyMinimized}>
+                                <textarea ref="userInput_History" rows={15} style={{width: '95%', alignContent: 'center'}} className="form-control mt-1">{this.state.modalBody.history}</textarea>
+                            </Collapse>
                         </div>
-                        <div>
-                            <Badge color="primary">Enviado por:</Badge>
-                            <p>{this.state.modalBody.uploader}</p>
+
+                        <div className="form-group">
+                            <Badge color="primary">Indiciado:</Badge>
+
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Testemunha:</Badge>
+
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Vitima:</Badge>
+
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Objetos:</Badge>
+
                         </div>
 
                     </ModalBody>
                     <ModalFooter>
                         <Button color="secondary" onClick={this.toggle}>Fechar</Button>
-                        <Button color="warning" outline style={{display: this.state.reportEditMode ? '' : 'none'}} onClick={this.submitUserInput.bind(this)}>Enviar</Button>
+                        <Button color="warning" style={{display: this.state.reportEditMode ? '' : 'none'}} onClick={this.submitUserInput.bind(this)}>Enviar</Button>
                     </ModalFooter>
                 </Modal>
 
