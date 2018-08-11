@@ -106,11 +106,11 @@ class UploadFile extends Component {
             this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false, uploadFilesReturnedFromServer: data});
 
             if(errorOnUpload && data.length === 1) {
-                this.props.notify('Error', 'error', 'Error while uploading file!');
+                this.props.notify('Error', 'error', 'Erro ao fazer o upload do arquivo!');
             } else if(errorOnUpload) {
-                this.props.notify('Warning', 'warning', 'Few errors encountered while uploading files! Please refer status.');
+                this.props.notify('Warning', 'warning', 'Poucos erros encontrados durante o upload de arquivos!');
             } else {
-                this.props.notify('Success', 'success', 'files uploaded!');
+                this.props.notify('Success', 'success', 'Arquivos enviados!');
             }
             this.props.manageScreenLoader(false);
             this.props.updateChartData(uploadedReports);
@@ -118,7 +118,7 @@ class UploadFile extends Component {
 
         } catch (err) {
             console.log(err);
-            this.props.notify('Error', 'error', 'upload failed. Contact support team!');
+            this.props.notify('Error', 'error', 'o upload falhou. Entre em contato com a equipe de suporte!');
             this.props.manageScreenLoader(false);
             this.setState({uploadInProgress: false});
         }
@@ -279,11 +279,11 @@ class UploadFile extends Component {
     handleFromDate(date) {
         if(date !== null) {
         if (moment(date).isAfter(moment(this.endDate).subtract(1, 'd'))) {
-            this.props.notify('Warning', 'warning', 'Select From Date earlier than To Date.');
+            this.props.notify('Warning', 'warning', 'Selecione desde a data anterior a data.');
             return false;
         }
         if (moment(date).isAfter(moment())) {
-            this.props.notify('Warning', 'warning', 'Select valid Date.');
+            this.props.notify('Warning', 'warning', 'Selecione data válida.');
             return false;
         }
     }
@@ -295,11 +295,11 @@ class UploadFile extends Component {
     handleToDate(date) {
         if(date !== null) {
         if (moment(date).isBefore(moment(this.startDate).add(1, 'd'))) {
-            this.props.notify('Warning', 'warning', 'Select To Date later than From Date.');
+            this.props.notify('Warning', 'warning', 'Selecione até a data mais tarde que Da data.');
             return false;
         }
         if (moment(date).isAfter(moment())) {
-            this.props.notify('Warning', 'warning', 'Select valid Date.');
+            this.props.notify('Warning', 'warning', 'Selecione data válida.');
             return false;
         }
     }
@@ -502,7 +502,7 @@ class UploadFile extends Component {
                     <ModalBody>
                         <div>
                             <Badge color="primary">Data:</Badge>
-                            <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole == 'SUPER_ADMIN' ? '' : 'none'}}
+                            <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole === 'SUPER_ADMIN' ? '' : 'none'}}
                                     onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View
                                 Report</Button>
                             <p>{this.state.modalBody.data}</p>
@@ -529,7 +529,7 @@ class UploadFile extends Component {
                             <p>{this.state.modalBody.history}</p>
                         </div>
                         <div>
-                            <Badge color="primary">Uploader:</Badge>
+                            <Badge color="primary">Enviado por:</Badge>
                             <p>{this.state.modalBody.uploader}</p>
                         </div>
 
@@ -545,7 +545,7 @@ class UploadFile extends Component {
                             <tbody>
                                 <tr className="bg-info">
                                     <td style={{width: '50%'}}>
-                                        File Name
+                                        Arquivo
                                     </td>
                                     <td style={{width: '35%'}}>
                                         &nbsp;
