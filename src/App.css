@@ -65,3 +65,7 @@
 .edit-icon:hover {
     color: darkorange;
 }
+
+.bg-change-on-hover:hover {
+    background-color: lightgray;
+}

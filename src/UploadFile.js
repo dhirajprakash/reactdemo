@@ -28,6 +28,7 @@ import FaEdit from 'react-icons/lib/fa/edit';
 import FaTimesCircle from 'react-icons/lib/fa/times-circle';
 import FaAngleUp from 'react-icons/lib/fa/angle-double-up';
 import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
+import Person from './Person';
 
 class UploadFile extends Component {
 
@@ -42,7 +43,7 @@ class UploadFile extends Component {
             uploadStatusModal: false,
             modalTitle: '',
             modalBody: {},
-            noDataText: 'Loading...',
+            noDataText: 'Carregando...',
             mapData: [],
             searchText: '',
             uploadFilesReturnedFromServer: [],
@@ -50,7 +51,10 @@ class UploadFile extends Component {
             reportEditMode: false,
             editTooltipOpen: false,
             cancelEditTooltipOpen: false,
-            historyMinimized: false
+            historyMinimized: false,
+            indiciadoPersons: [],
+            testimonyPersons: [],
+            victimPersons: []
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -63,6 +67,9 @@ class UploadFile extends Component {
         this.handleFromDate = this.handleFromDate.bind(this);
         this.handleToDate = this.handleToDate.bind(this);
         this.checkDateFilter = this.checkDateFilter.bind(this);
+        this.addIndiciadoPerson = this.addIndiciadoPerson.bind(this);
+        this.addTestimonyPerson = this.addTestimonyPerson.bind(this);
+        this.addVictimPerson = this.addVictimPerson.bind(this);
     }
 
     async uploadFiles(files) {
@@ -152,11 +159,11 @@ class UploadFile extends Component {
                 this.searchReports();
 
             } else {
-                this.setState({noDataText: 'No reports found!', tableLoading: false});
+                this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
             }
             this.props.manageScreenLoader(false);
         } catch (err) {
-            this.setState({noDataText: 'No reports found!', tableLoading: false});
+            this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
             console.log(err);
             this.props.manageScreenLoader(false);
         }
@@ -226,7 +233,7 @@ class UploadFile extends Component {
 
             });
             //console.log(results);
-            const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
+            const message = results.length === 0 ? 'Nenhum arquivo correspondente!' : this.state.noDataText;
             this.setState({searchResult: results, noDataText: message});
             this.getMapCoordinates(results);
             this.props.updateChartData(results);
@@ -337,6 +344,17 @@ class UploadFile extends Component {
     toggleHistoryView() {
         this.setState({historyMinimized: !this.state.historyMinimized});
     }
+
+    addIndiciadoPerson() {
+
+    }
+    addTestimonyPerson() {
+
+    }
+    addVictimPerson() {
+
+    }
+
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -604,23 +622,23 @@ class UploadFile extends Component {
                             <FaAngleUp style={{display: this.state.historyMinimized ? 'none' : '', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
                             <FaAngleDown style={{display: this.state.historyMinimized ? '' : 'none', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
                             <Collapse isOpen={!this.state.historyMinimized}>
-                                <textarea ref="userInput_History" rows={15} style={{width: '95%', alignContent: 'center'}} className="form-control mt-1">{this.state.modalBody.history}</textarea>
+                                <textarea ref="userInput_History" rows={15} style={{alignContent: 'center'}} className="form-control mt-1">{this.state.modalBody.history}</textarea>
                             </Collapse>
                         </div>
 
                         <div className="form-group">
                             <Badge color="primary">Indiciado:</Badge>
-
+                            <Person addPerson={(personObj) => this.addIndiciadoPerson(personObj)} persons={this.state.indiciadoPersons}/>
                         </div>
 
                         <div className="form-group">
                             <Badge color="primary">Testemunha:</Badge>
-
+                            <Person addPerson={(personObj) => this.addTestimonyPerson(personObj)} persons={this.state.testimonyPersons}/>
                         </div>
 
                         <div className="form-group">
                             <Badge color="primary">Vitima:</Badge>
-
+                            <Person addPerson={(personObj) => this.addVictimPerson(personObj)} persons={this.state.victimPersons}/>
                         </div>
 
                         <div className="form-group">
