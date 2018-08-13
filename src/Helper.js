@@ -6,12 +6,12 @@ export default class Helper {
     }
 
     static getAPI() {
-        return 'http://localhost:8080/';
-        //return 'http://35.169.168.197:8080/integracaodeforcas/';
+        //return 'http://localhost:8080/';
+        return 'http://35.169.168.197:8080/integracaodeforcas/';
     }
 
     static getClientId() {
-        return '0oaec0zyf1tVzyXDl0h7'; //DEV
-        //return '0oae057tzmrQTeTtx0h7'; // PROD
+        //return '0oaec0zyf1tVzyXDl0h7'; //DEV
+        return '0oae057tzmrQTeTtx0h7'; // PROD
     }
 }
