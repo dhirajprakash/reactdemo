@@ -6,7 +6,9 @@ import {
     ModalBody,
     ModalFooter,
     Badge,
-    Button
+    Button,
+    Tooltip,
+    Collapse
 } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
@@ -22,6 +24,11 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import FaExclamationTriangle from 'react-icons/lib/fa/exclamation-triangle';
 import FaExclamationCircle from 'react-icons/lib/fa/exclamation-circle';
+import FaEdit from 'react-icons/lib/fa/edit';
+import FaTimesCircle from 'react-icons/lib/fa/times-circle';
+import FaAngleUp from 'react-icons/lib/fa/angle-double-up';
+import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
+import Person from './Person';
 
 class UploadFile extends Component {
 
@@ -36,11 +43,18 @@ class UploadFile extends Component {
             uploadStatusModal: false,
             modalTitle: '',
             modalBody: {},
-            noDataText: 'Loading...',
+            noDataText: 'Carregando...',
             mapData: [],
             searchText: '',
             uploadFilesReturnedFromServer: [],
-            userRole: ''
+            userRole: '',
+            reportEditMode: false,
+            editTooltipOpen: false,
+            cancelEditTooltipOpen: false,
+            historyMinimized: false,
+            indiciadoPersons: [],
+            testimonyPersons: [],
+            victimPersons: []
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -53,6 +67,13 @@ class UploadFile extends Component {
         this.handleFromDate = this.handleFromDate.bind(this);
         this.handleToDate = this.handleToDate.bind(this);
         this.checkDateFilter = this.checkDateFilter.bind(this);
+        this.addIndiciadoPerson = this.addIndiciadoPerson.bind(this);
+        this.addTestimonyPerson = this.addTestimonyPerson.bind(this);
+        this.addVictimPerson = this.addVictimPerson.bind(this);
+        this.checkValidPerson = this.checkValidPerson.bind(this);
+        this.deleteIndiciadoPerson = this.deleteIndiciadoPerson.bind(this);
+        this.deleteTestimonyPerson = this.deleteTestimonyPerson.bind(this);
+        this.deleteVictimPerson = this.deleteVictimPerson.bind(this);
     }
 
     async uploadFiles(files) {
@@ -106,11 +127,11 @@ class UploadFile extends Component {
             this.setState({reports: uploadedReports, searchResult: uploadedReports, uploadInProgress: false, uploadFilesReturnedFromServer: data});
 
             if(errorOnUpload && data.length === 1) {
-                this.props.notify('Error', 'error', 'Error while uploading file!');
+                this.props.notify('Error', 'error', 'Erro ao fazer o upload do arquivo!');
             } else if(errorOnUpload) {
-                this.props.notify('Warning', 'warning', 'Few errors encountered while uploading files! Please refer status.');
+                this.props.notify('Warning', 'warning', 'Poucos erros encontrados durante o upload de arquivos!');
             } else {
-                this.props.notify('Success', 'success', 'files uploaded!');
+                this.props.notify('Success', 'success', 'Arquivos enviados!');
             }
             this.props.manageScreenLoader(false);
             this.props.updateChartData(uploadedReports);
@@ -118,7 +139,7 @@ class UploadFile extends Component {
 
         } catch (err) {
             console.log(err);
-            this.props.notify('Error', 'error', 'upload failed. Contact support team!');
+            this.props.notify('Error', 'error', 'o upload falhou. Entre em contato com a equipe de suporte!');
             this.props.manageScreenLoader(false);
             this.setState({uploadInProgress: false});
         }
@@ -142,11 +163,11 @@ class UploadFile extends Component {
                 this.searchReports();
 
             } else {
-                this.setState({noDataText: 'No reports found!', tableLoading: false});
+                this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
             }
             this.props.manageScreenLoader(false);
         } catch (err) {
-            this.setState({noDataText: 'No reports found!', tableLoading: false});
+            this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
             console.log(err);
             this.props.manageScreenLoader(false);
         }
@@ -168,9 +189,63 @@ class UploadFile extends Component {
 
     toggle() {
         this.setState({
-            modal: !this.state.modal
+            modal: !this.state.modal,
+            reportEditMode: false,
+            historyMinimized: false,
+            indiciadoPersons: [],
+            testimonyPersons: [],
+            victimPersons: []
         });
     }
+
+    async submitUserInput() {
+        try {
+            this.props.manageScreenLoader(true);
+
+            //create userInputDataMap
+            const userInput = {
+                Dependencia: this.refs.userInput_Dependencia.value,
+                Flagrante: this.refs.userInput_Flagrante.value,
+                History: this.refs.userInput_History.value,
+                Indiciado: this.state.indiciadoPersons,
+                Testemunha: this.state.testimonyPersons,
+                Vitima: this.state.victimPersons,
+                editedBy: this.props.userId,
+                uploader: this.refs.userInput_uploader.value
+            }
+            const report = {
+                reportId: this.refs.userInput_BoletimNo.value,
+                userInputDataMap: userInput
+            };
+            const response = await fetch(Helper.getAPI() + 'reports/update', {
+                headers: {
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(report)
+            });
+            const data = await response.json();
+            //console.log(data);
+            if (data && data.length > 0) {
+                this.props.updateUser(data[0].userRole);
+                this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
+                //this.getMapCoordinates(data);
+                this.searchReports();
+
+            } else {
+                this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
+            }
+            this.props.manageScreenLoader(false);
+        } catch (err) {
+            this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
+            console.log(err);
+            this.props.manageScreenLoader(false);
+        }
+
+        this.toggle();
+    }
+
     uploadStatusToggle() {
         this.setState({
             uploadStatusModal: !this.state.uploadStatusModal
@@ -209,7 +284,7 @@ class UploadFile extends Component {
 
             });
             //console.log(results);
-            const message = results.length === 0 ? 'No matching reports!' : this.state.noDataText;
+            const message = results.length === 0 ? 'Nenhum arquivo correspondente!' : this.state.noDataText;
             this.setState({searchResult: results, noDataText: message});
             this.getMapCoordinates(results);
             this.props.updateChartData(results);
@@ -279,11 +354,11 @@ class UploadFile extends Component {
     handleFromDate(date) {
         if(date !== null) {
         if (moment(date).isAfter(moment(this.endDate).subtract(1, 'd'))) {
-            this.props.notify('Warning', 'warning', 'Select From Date earlier than To Date.');
+            this.props.notify('Warning', 'warning', 'Selecione desde a data anterior a data.');
             return false;
         }
         if (moment(date).isAfter(moment())) {
-            this.props.notify('Warning', 'warning', 'Select valid Date.');
+            this.props.notify('Warning', 'warning', 'Selecione data válida.');
             return false;
         }
     }
@@ -295,11 +370,11 @@ class UploadFile extends Component {
     handleToDate(date) {
         if(date !== null) {
         if (moment(date).isBefore(moment(this.startDate).add(1, 'd'))) {
-            this.props.notify('Warning', 'warning', 'Select To Date later than From Date.');
+            this.props.notify('Warning', 'warning', 'Selecione até a data mais tarde que Da data.');
             return false;
         }
         if (moment(date).isAfter(moment())) {
-            this.props.notify('Warning', 'warning', 'Select valid Date.');
+            this.props.notify('Warning', 'warning', 'Selecione data válida.');
             return false;
         }
     }
@@ -308,21 +383,85 @@ class UploadFile extends Component {
 
     }
 
+    editReportDetail() {
+        this.setState({reportEditMode: !this.state.reportEditMode, editTooltipOpen: !this.state.editTooltipOpen, cancelEditTooltipOpen: !this.state.cancelEditTooltipOpen});
+    }
+    toggleEditTooltip() {
+        this.setState({editTooltipOpen: !this.state.editTooltipOpen});
+    }
+    toggleCancelEditTooltip() {
+        this.setState({cancelEditTooltipOpen: !this.state.cancelEditTooltipOpen});
+    }
+    toggleHistoryView() {
+        this.setState({historyMinimized: !this.state.historyMinimized});
+    }
+
+    addIndiciadoPerson(personObj) {
+        if (this.checkValidPerson(personObj)){
+            const personArray = this.state.indiciadoPersons;
+            personArray.push(personObj);
+            this.setState({indiciadoPersons: personArray});
+        }
+    }
+    deleteIndiciadoPerson(id) {
+        const personArray = this.state.indiciadoPersons;
+        const personUpd = personArray.filter(p => p.id !== id);
+        this.setState({indiciadoPersons: personUpd});
+    }
+
+    addTestimonyPerson(personObj) {
+        if (this.checkValidPerson(personObj)){
+            const personArray = this.state.testimonyPersons;
+            personArray.push(personObj);
+            this.setState({testimonyPersons: personArray});
+        }
+    }
+    deleteTestimonyPerson(id) {
+        const personArray = this.state.testimonyPersons;
+        const personUpd = personArray.filter(p => p.id !== id);
+        this.setState({testimonyPersons: personUpd});
+    }
+
+    addVictimPerson(personObj) {
+        if (this.checkValidPerson(personObj)){
+            const personArray = this.state.victimPersons;
+            personArray.push(personObj);
+            this.setState({victimPersons: personArray});
+        }
+    }
+    deleteVictimPerson(id) {
+        const personArray = this.state.victimPersons;
+        const personUpd = personArray.filter(p => p.id !== id);
+        this.setState({victimPersons: personUpd});
+    }
+
+    checkValidPerson(personObj) {
+        if (personObj.age > 200 || personObj.age < 1) {
+            this.props.notify('Error', 'error', 'insira idade válida!');
+            return false;
+        } else if (personObj.name == '') {
+            this.props.notify('Error', 'error', 'Enter name!');
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     render() {
 
         const data = this.state.searchResult.map(rpt => {
             return ({
-                reportName: rpt.pdfDataMap.BoletimNo,
-                flagrante: rpt.pdfDataMap.Flagrante,
-                data: rpt.pdfDataMap.Data,
-                dependencia: rpt.pdfDataMap.Dependencia,
-                emitido: rpt.pdfDataMap.Emitido,
-                history: rpt.pdfDataMap.History ? rpt.pdfDataMap.History.split('~').join(' ') : 'N.A.',
+                BoletimNo: rpt.pdfDataMap.BoletimNo,
+                Flagrante: rpt.pdfDataMap.Flagrante,
+                Data: rpt.pdfDataMap.Data,
+                Dependencia: rpt.pdfDataMap.Dependencia,
+                Emitido: rpt.pdfDataMap.Emitido,
+                History: rpt.pdfDataMap.History ? rpt.pdfDataMap.History.split('~').join(' ') : 'N.A.',
                 uploader: rpt.pdfDataMap.uploader,
-                localCrime: rpt.pdfDataMap.LocalCrime,
+                LocalCrime: rpt.pdfDataMap.LocalCrime,
                 s3ReportName: rpt.pdfDataMap.s3ReportName,
-                longitude: rpt.pdfDataMap.Longitude,
-                latitude: rpt.pdfDataMap.Latitude,
+                Longitude: rpt.pdfDataMap.Longitude,
+                Latitude: rpt.pdfDataMap.Latitude,
                 Especie: rpt.pdfDataMap.Especie,
                 Year: rpt.pdfDataMap.Year,
                 Autoria: rpt.pdfDataMap.Autoria,
@@ -338,32 +477,32 @@ class UploadFile extends Component {
             {
                 Header: 'Boletim No.',
                 headerClassName: 'bg-secondary',
-                accessor: 'reportName'
+                accessor: 'BoletimNo'
             },
             {
                 Header: 'Dependencia',
                 headerClassName: 'bg-secondary',
-                accessor: 'dependencia'
+                accessor: 'Dependencia'
             },
             {
                 Header: 'Ocorrência',
                 headerClassName: 'bg-secondary',
-                accessor: 'data'
+                accessor: 'Data'
             },
             {
                 Header: 'Emitido',
                 headerClassName: 'bg-secondary',
-                accessor: 'emitido'
+                accessor: 'Emitido'
             },
             {
                 Header: 'LocalCrime',
                 headerClassName: 'bg-secondary',
-                accessor: 'localCrime',
+                accessor: 'LocalCrime',
             },
             {
                 Header: 'Flagrante',
                 headerClassName: 'bg-secondary',
-                accessor: 'flagrante'
+                accessor: 'Flagrante'
             }
         ];
 
@@ -455,7 +594,7 @@ class UploadFile extends Component {
                                         onClick: (e) => {
                                             if (rowInfo) {
                                                 this.setState({
-                                                    modalTitle: rowInfo.original.reportName,
+                                                    modalTitle: rowInfo.original.BoletimNo,
                                                     modalBody: rowInfo.original
                                                 });
                                                 this.toggle();
@@ -499,44 +638,115 @@ class UploadFile extends Component {
                 </div>
 
                 <Modal className="font-common" isOpen={this.state.modal} toggle={this.toggle} size="lg" centered="true">
-                    <ModalHeader toggle={this.toggle}>Boletim: {this.state.modalTitle}</ModalHeader>
-                    <ModalBody>
+                    <ModalHeader toggle={this.toggle}>
+                        Boletim: {this.state.modalTitle}&nbsp;
+                        <FaEdit className="edit-icon" id="editReportIcon" style={{cursor: 'Pointer', marginLeft: 10, marginTop: -5, display: this.state.reportEditMode ? 'none' : ''}} onClick={this.editReportDetail.bind(this)} />
+                        <Tooltip placement="right" delay={{ show: 200, hide: 0 }} isOpen={this.state.editTooltipOpen} target="editReportIcon" toggle={this.toggleEditTooltip.bind(this)}>
+                            Editar detalhes do arquivo!
+                        </Tooltip>
+                        <FaTimesCircle className="edit-icon" id="cancelEditReportIcon" style={{cursor: 'Pointer', marginLeft: 10, marginTop: -5, display: this.state.reportEditMode ? '' : 'none'}} onClick={this.editReportDetail.bind(this)} />
+                        <Tooltip placement="right" delay={{ show: 200, hide: 0 }} isOpen={this.state.cancelEditTooltipOpen} target="cancelEditReportIcon" toggle={this.toggleCancelEditTooltip.bind(this)}>
+                            cancelar a edição
+                        </Tooltip>
+                    </ModalHeader>
+                    <ModalBody style={{display: this.state.reportEditMode ? 'none' : ''}}>
                         <div>
                             <Badge color="primary">Data:</Badge>
-                            <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole == 'SUPER_ADMIN' ? '' : 'none'}}
+                            <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole === 'SUPER_ADMIN' ? '' : 'none'}}
                                     onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View
                                 Report</Button>
-                            <p>{this.state.modalBody.data}</p>
+                            <p>{this.state.modalBody.Data}</p>
                         </div>
                         <div>
                             <Badge color="primary">Emitido:</Badge>
-                            <p>{this.state.modalBody.emitido}</p>
+                            <p>{this.state.modalBody.Emitido}</p>
                         </div>
                         <div>
                             <Badge color="primary">LocalCrime:</Badge>
-                            <p>{this.state.modalBody.localCrime}</p>
+                            <p>{this.state.modalBody.LocalCrime}</p>
                         </div>
                         <div>
                             <Badge color="primary">Dependencia:</Badge>
-                            <p>{this.state.modalBody.dependencia}</p>
+                            <p>{this.state.modalBody.Dependencia}</p>
                         </div>
                         <div>
                             <Badge color="primary">Flagrante:</Badge>
-                            <p>{this.state.modalBody.flagrante}</p>
+                            <p>{this.state.modalBody.Flagrante}</p>
                         </div>
 
                         <div>
                             <Badge color="primary">Histórico:</Badge>
-                            <p>{this.state.modalBody.history}</p>
+                            <p>{this.state.modalBody.History}</p>
                         </div>
                         <div>
-                            <Badge color="primary">Uploader:</Badge>
+                            <Badge color="primary">Enviado por:</Badge>
                             <p>{this.state.modalBody.uploader}</p>
                         </div>
 
                     </ModalBody>
+                    <ModalBody style={{display: this.state.reportEditMode ? '' : 'none'}}>
+                        {/*<div>
+                            <Badge color="primary">Data:</Badge>
+                            <p>{this.state.modalBody.Data}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Emitido:</Badge>
+                            <p>{this.state.modalBody.Emitido}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">LocalCrime:</Badge>
+                            <p>{this.state.modalBody.LocalCrime}</p>
+                        </div>*/}
+                        <div>
+                        <input type="hidden" ref="userInput_uploader" value={this.state.modalBody.uploader}/>
+                            <input type="hidden" ref="userInput_BoletimNo" value={this.state.modalBody.BoletimNo}/>
+                        </div>
+                        <div className="form-group">
+                            <Badge color="primary">Dependencia:</Badge>
+                            <br/>
+                            <input ref="userInput_Dependencia" className="form-control mt-1" defaultValue={this.state.modalBody.Dependencia}/>
+                        </div>
+                        <div className="form-group">
+                            <Badge color="primary">Flagrante:</Badge>
+                            <select ref="userInput_Flagrante" className="form-control mt-1" defaultValue={this.state.modalBody.Flagrante}>
+                                <option value="Sim" selected={this.state.modalBody.Flagrante == 'Sim'}>Sim</option>
+                                <option value="Nao" selected={this.state.modalBody.Flagrante != 'Sim'}>Nao</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Histórico:</Badge>
+                            <FaAngleUp style={{display: this.state.historyMinimized ? 'none' : '', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
+                            <FaAngleDown style={{display: this.state.historyMinimized ? '' : 'none', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
+                            <Collapse isOpen={!this.state.historyMinimized}>
+                                <textarea ref="userInput_History" rows={15} style={{alignContent: 'center'}} className="form-control mt-1">{this.state.modalBody.History}</textarea>
+                            </Collapse>
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Indiciado:</Badge>
+                            <Person addPerson={(personObj) => this.addIndiciadoPerson(personObj)} deletePerson={(id) => this.deleteIndiciadoPerson(id)} persons={this.state.indiciadoPersons}/>
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Testemunha:</Badge>
+                            <Person addPerson={(personObj) => this.addTestimonyPerson(personObj)} deletePerson={(id) => this.deleteTestimonyPerson(id)} persons={this.state.testimonyPersons}/>
+                        </div>
+
+                        <div className="form-group">
+                            <Badge color="primary">Vitima:</Badge>
+                            <Person addPerson={(personObj) => this.addVictimPerson(personObj)} deletePerson={(id) => this.deleteVictimPerson(id)} persons={this.state.victimPersons}/>
+                        </div>
+
+                        {/*<div className="form-group">
+                            <Badge color="primary">Objetos:</Badge>
+
+                        </div>*/}
+
+                    </ModalBody>
                     <ModalFooter>
                         <Button color="secondary" onClick={this.toggle}>Fechar</Button>
+                        <Button color="warning" style={{display: this.state.reportEditMode ? '' : 'none'}} onClick={this.submitUserInput.bind(this)}>Enviar</Button>
                     </ModalFooter>
                 </Modal>
 
@@ -546,7 +756,7 @@ class UploadFile extends Component {
                             <tbody>
                                 <tr className="bg-info">
                                     <td style={{width: '50%'}}>
-                                        File Name
+                                        Arquivo
                                     </td>
                                     <td style={{width: '35%'}}>
                                         &nbsp;
