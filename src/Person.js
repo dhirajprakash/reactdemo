@@ -1,20 +1,28 @@
 import React, {Component} from 'react';
-import FaPlusSquareO from 'react-icons/lib/fa/plus-square-o';
 import {Button} from 'reactstrap';
+import uuid from 'uuid';
 
 class Person extends Component {
 
-constructor(props) {
-    super(props);
+    addPerson() {
+        const personObj = {
+          id: uuid.v4(),
+          name: this.refs.personName.value,
+          age: this.refs.personAge.value,
+          gender: this.refs.personGender.value,
+          address: this.refs.personAddress.value,
+          moreInfo: this.refs.personMoreInfo.value
+        };
 
-    this.state = {
-        persons: props.persons
+        this.props.addPerson(personObj);
     }
-}
+    deletePerson(id) {
+        this.props.deletePerson(id);
+    }
 
 render() {
 
-    const personsData = this.state.persons.map(p =>
+    const personsData = this.props.persons.map(p =>
         <tr key={p.id}>
             <td>
                 {p.name}
@@ -31,11 +39,14 @@ render() {
             <td>
                 {p.moreInfo}
             </td>
+            <td>
+                <Button color="danger" size="sm" outline onClick={this.deletePerson.bind(this, p.id)}>-</Button>
+            </td>
         </tr>
     );
     return (
         <div className="bg-change-on-hover">
-            <table>
+            <table className="mt-2">
                 <tbody>
                 <tr>
                     <td>
@@ -47,13 +58,13 @@ render() {
                     <td width="10%">
                         <div className="input-group-sm ml-1">
                             <label>Era</label>
-                            <input type="number" max={200} maxLength={3} className="form-control" ref="personAge" />
+                            <input type="number" className="form-control" ref="personAge" />
                         </div>
                     </td>
                     <td>
                         <div className="input-group-sm ml-1">
                             <label>Sexo</label>
-                            <select className="form-control" ref="personSex">
+                            <select className="form-control" ref="personGender">
                             <option value="Masculino">Masculino</option>
                             <option value="Femea">Fêmea</option>
                             </select>
@@ -72,18 +83,28 @@ render() {
                         </div>
                     </td>
                     <td>
-                        <div className="ml-1">
-                            <Button color="success" size="sm" outline className="mt-5">+</Button>
+                        <div className="ml-1 mt-4">
+                            <Button color="success" size="sm" outline className="mb-1 mt-1" onClick={this.addPerson.bind(this)}>+</Button>
                         </div>
                     </td>
                 </tr>
                 </tbody>
             </table>
-            <table className="table table-hover table-bordered" style={{display: this.state.persons && this.state.persons.length > 0 ? '' : 'none'}}>
+            <div className="mt-3 mb-2" style={{display: this.props.persons && this.props.persons.length > 0 ? '' : 'none', maxHeight: 200, overflowX: 'auto'}}>
+            <table className="table table-hover table-bordered">
                 <tbody>
-
+                <tr className="card-header-tabs bg-secondary">
+                    <th>Nome</th>
+                    <th>Era</th>
+                    <th>Sexo</th>
+                    <th>Endereço</th>
+                    <th>Notas</th>
+                    <th>&nbsp;</th>
+                </tr>
+                {personsData}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }

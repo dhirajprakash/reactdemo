@@ -70,6 +70,10 @@ class UploadFile extends Component {
         this.addIndiciadoPerson = this.addIndiciadoPerson.bind(this);
         this.addTestimonyPerson = this.addTestimonyPerson.bind(this);
         this.addVictimPerson = this.addVictimPerson.bind(this);
+        this.checkValidPerson = this.checkValidPerson.bind(this);
+        this.deleteIndiciadoPerson = this.deleteIndiciadoPerson.bind(this);
+        this.deleteTestimonyPerson = this.deleteTestimonyPerson.bind(this);
+        this.deleteVictimPerson = this.deleteVictimPerson.bind(this);
     }
 
     async uploadFiles(files) {
@@ -187,11 +191,58 @@ class UploadFile extends Component {
         this.setState({
             modal: !this.state.modal,
             reportEditMode: false,
-            historyMinimized: false
+            historyMinimized: false,
+            indiciadoPersons: [],
+            testimonyPersons: [],
+            victimPersons: []
         });
     }
 
-    submitUserInput() {
+    async submitUserInput() {
+        try {
+            this.props.manageScreenLoader(true);
+
+            //create userInputDataMap
+            const userInput = {
+                Dependencia: this.refs.userInput_Dependencia.value,
+                Flagrante: this.refs.userInput_Flagrante.value,
+                History: this.refs.userInput_History.value,
+                Indiciado: this.state.indiciadoPersons,
+                Testemunha: this.state.testimonyPersons,
+                Vitima: this.state.victimPersons,
+                editedBy: this.props.userId,
+                uploader: this.refs.userInput_uploader.value
+            }
+            const report = {
+                reportId: this.refs.userInput_BoletimNo.value,
+                userInputDataMap: userInput
+            };
+            const response = await fetch(Helper.getAPI() + '/reports/update', {
+                headers: {
+                    Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(report)
+            });
+            const data = await response.json();
+            //console.log(data);
+            if (data && data.length > 0) {
+                this.props.updateUser(data[0].userRole);
+                this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
+                //this.getMapCoordinates(data);
+                this.searchReports();
+
+            } else {
+                this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
+            }
+            this.props.manageScreenLoader(false);
+        } catch (err) {
+            this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
+            console.log(err);
+            this.props.manageScreenLoader(false);
+        }
+
         this.toggle();
     }
 
@@ -345,31 +396,72 @@ class UploadFile extends Component {
         this.setState({historyMinimized: !this.state.historyMinimized});
     }
 
-    addIndiciadoPerson() {
-
+    addIndiciadoPerson(personObj) {
+        if (this.checkValidPerson(personObj)){
+            const personArray = this.state.indiciadoPersons;
+            personArray.push(personObj);
+            this.setState({indiciadoPersons: personArray});
+        }
     }
-    addTestimonyPerson() {
-
+    deleteIndiciadoPerson(id) {
+        const personArray = this.state.indiciadoPersons;
+        const personUpd = personArray.filter(p => p.id !== id);
+        this.setState({indiciadoPersons: personUpd});
     }
-    addVictimPerson() {
 
+    addTestimonyPerson(personObj) {
+        if (this.checkValidPerson(personObj)){
+            const personArray = this.state.testimonyPersons;
+            personArray.push(personObj);
+            this.setState({testimonyPersons: personArray});
+        }
+    }
+    deleteTestimonyPerson(id) {
+        const personArray = this.state.testimonyPersons;
+        const personUpd = personArray.filter(p => p.id !== id);
+        this.setState({testimonyPersons: personUpd});
+    }
+
+    addVictimPerson(personObj) {
+        if (this.checkValidPerson(personObj)){
+            const personArray = this.state.victimPersons;
+            personArray.push(personObj);
+            this.setState({victimPersons: personArray});
+        }
+    }
+    deleteVictimPerson(id) {
+        const personArray = this.state.victimPersons;
+        const personUpd = personArray.filter(p => p.id !== id);
+        this.setState({victimPersons: personUpd});
+    }
+
+    checkValidPerson(personObj) {
+        if (personObj.age > 200 || personObj.age < 1) {
+            this.props.notify('Error', 'error', 'insira idade válida!');
+            return false;
+        } else if (personObj.name == '') {
+            this.props.notify('Error', 'error', 'Enter name!');
+            return false;
+        } else {
+            return true;
+        }
     }
 
     render() {
 
         const data = this.state.searchResult.map(rpt => {
             return ({
-                reportName: rpt.pdfDataMap.BoletimNo,
-                flagrante: rpt.pdfDataMap.Flagrante,
-                data: rpt.pdfDataMap.Data,
-                dependencia: rpt.pdfDataMap.Dependencia,
-                emitido: rpt.pdfDataMap.Emitido,
-                history: rpt.pdfDataMap.History ? rpt.pdfDataMap.History.split('~').join(' ') : 'N.A.',
+                BoletimNo: rpt.pdfDataMap.BoletimNo,
+                Flagrante: rpt.pdfDataMap.Flagrante,
+                Data: rpt.pdfDataMap.Data,
+                Dependencia: rpt.pdfDataMap.Dependencia,
+                Emitido: rpt.pdfDataMap.Emitido,
+                History: rpt.pdfDataMap.History ? rpt.pdfDataMap.History.split('~').join(' ') : 'N.A.',
                 uploader: rpt.pdfDataMap.uploader,
-                localCrime: rpt.pdfDataMap.LocalCrime,
+                LocalCrime: rpt.pdfDataMap.LocalCrime,
                 s3ReportName: rpt.pdfDataMap.s3ReportName,
-                longitude: rpt.pdfDataMap.Longitude,
-                latitude: rpt.pdfDataMap.Latitude,
+                Longitude: rpt.pdfDataMap.Longitude,
+                Latitude: rpt.pdfDataMap.Latitude,
                 Especie: rpt.pdfDataMap.Especie,
                 Year: rpt.pdfDataMap.Year,
                 Autoria: rpt.pdfDataMap.Autoria,
@@ -385,32 +477,32 @@ class UploadFile extends Component {
             {
                 Header: 'Boletim No.',
                 headerClassName: 'bg-secondary',
-                accessor: 'reportName'
+                accessor: 'BoletimNo'
             },
             {
                 Header: 'Dependencia',
                 headerClassName: 'bg-secondary',
-                accessor: 'dependencia'
+                accessor: 'Dependencia'
             },
             {
                 Header: 'Ocorrência',
                 headerClassName: 'bg-secondary',
-                accessor: 'data'
+                accessor: 'Data'
             },
             {
                 Header: 'Emitido',
                 headerClassName: 'bg-secondary',
-                accessor: 'emitido'
+                accessor: 'Emitido'
             },
             {
                 Header: 'LocalCrime',
                 headerClassName: 'bg-secondary',
-                accessor: 'localCrime',
+                accessor: 'LocalCrime',
             },
             {
                 Header: 'Flagrante',
                 headerClassName: 'bg-secondary',
-                accessor: 'flagrante'
+                accessor: 'Flagrante'
             }
         ];
 
@@ -501,7 +593,7 @@ class UploadFile extends Component {
                                         onClick: (e) => {
                                             if (rowInfo) {
                                                 this.setState({
-                                                    modalTitle: rowInfo.original.reportName,
+                                                    modalTitle: rowInfo.original.BoletimNo,
                                                     modalBody: rowInfo.original
                                                 });
                                                 this.toggle();
@@ -562,28 +654,28 @@ class UploadFile extends Component {
                             <Button outline color="primary" size="sm" className="float-right" style={{display: this.state.userRole === 'SUPER_ADMIN' ? '' : 'none'}}
                                     onClick={this.getReportLink.bind(this, this.state.modalBody.s3ReportName)}>View
                                 Report</Button>
-                            <p>{this.state.modalBody.data}</p>
+                            <p>{this.state.modalBody.Data}</p>
                         </div>
                         <div>
                             <Badge color="primary">Emitido:</Badge>
-                            <p>{this.state.modalBody.emitido}</p>
+                            <p>{this.state.modalBody.Emitido}</p>
                         </div>
                         <div>
                             <Badge color="primary">LocalCrime:</Badge>
-                            <p>{this.state.modalBody.localCrime}</p>
+                            <p>{this.state.modalBody.LocalCrime}</p>
                         </div>
                         <div>
                             <Badge color="primary">Dependencia:</Badge>
-                            <p>{this.state.modalBody.dependencia}</p>
+                            <p>{this.state.modalBody.Dependencia}</p>
                         </div>
                         <div>
                             <Badge color="primary">Flagrante:</Badge>
-                            <p>{this.state.modalBody.flagrante}</p>
+                            <p>{this.state.modalBody.Flagrante}</p>
                         </div>
 
                         <div>
                             <Badge color="primary">Histórico:</Badge>
-                            <p>{this.state.modalBody.history}</p>
+                            <p>{this.state.modalBody.History}</p>
                         </div>
                         <div>
                             <Badge color="primary">Enviado por:</Badge>
@@ -594,26 +686,30 @@ class UploadFile extends Component {
                     <ModalBody style={{display: this.state.reportEditMode ? '' : 'none'}}>
                         {/*<div>
                             <Badge color="primary">Data:</Badge>
-                            <p>{this.state.modalBody.data}</p>
+                            <p>{this.state.modalBody.Data}</p>
                         </div>
                         <div>
                             <Badge color="primary">Emitido:</Badge>
-                            <p>{this.state.modalBody.emitido}</p>
+                            <p>{this.state.modalBody.Emitido}</p>
                         </div>
                         <div>
                             <Badge color="primary">LocalCrime:</Badge>
-                            <p>{this.state.modalBody.localCrime}</p>
+                            <p>{this.state.modalBody.LocalCrime}</p>
                         </div>*/}
+                        <div>
+                        <input type="hidden" ref="userInput_uploader" value={this.state.modalBody.uploader}/>
+                            <input type="hidden" ref="userInput_BoletimNo" value={this.state.modalBody.BoletimNo}/>
+                        </div>
                         <div className="form-group">
                             <Badge color="primary">Dependencia:</Badge>
                             <br/>
-                            <input ref="userInput_Dependencia" className="form-control mt-1" defaultValue={this.state.modalBody.dependencia}/>
+                            <input ref="userInput_Dependencia" className="form-control mt-1" defaultValue={this.state.modalBody.Dependencia}/>
                         </div>
                         <div className="form-group">
                             <Badge color="primary">Flagrante:</Badge>
-                            <select ref="userInput_Flagrante" className="form-control mt-1" defaultValue={this.state.modalBody.flagrante}>
-                                <option value="Sim" selected={this.state.modalBody.flagrante == 'Sim'}>Sim</option>
-                                <option value="Nao" selected={this.state.modalBody.flagrante != 'Sim'}>Nao</option>
+                            <select ref="userInput_Flagrante" className="form-control mt-1" defaultValue={this.state.modalBody.Flagrante}>
+                                <option value="Sim" selected={this.state.modalBody.Flagrante == 'Sim'}>Sim</option>
+                                <option value="Nao" selected={this.state.modalBody.Flagrante != 'Sim'}>Nao</option>
                             </select>
                         </div>
 
@@ -622,29 +718,29 @@ class UploadFile extends Component {
                             <FaAngleUp style={{display: this.state.historyMinimized ? 'none' : '', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
                             <FaAngleDown style={{display: this.state.historyMinimized ? '' : 'none', cursor: 'pointer', marginLeft: 3}} onClick={this.toggleHistoryView.bind(this)} />
                             <Collapse isOpen={!this.state.historyMinimized}>
-                                <textarea ref="userInput_History" rows={15} style={{alignContent: 'center'}} className="form-control mt-1">{this.state.modalBody.history}</textarea>
+                                <textarea ref="userInput_History" rows={15} style={{alignContent: 'center'}} className="form-control mt-1">{this.state.modalBody.History}</textarea>
                             </Collapse>
                         </div>
 
                         <div className="form-group">
                             <Badge color="primary">Indiciado:</Badge>
-                            <Person addPerson={(personObj) => this.addIndiciadoPerson(personObj)} persons={this.state.indiciadoPersons}/>
+                            <Person addPerson={(personObj) => this.addIndiciadoPerson(personObj)} deletePerson={(id) => this.deleteIndiciadoPerson(id)} persons={this.state.indiciadoPersons}/>
                         </div>
 
                         <div className="form-group">
                             <Badge color="primary">Testemunha:</Badge>
-                            <Person addPerson={(personObj) => this.addTestimonyPerson(personObj)} persons={this.state.testimonyPersons}/>
+                            <Person addPerson={(personObj) => this.addTestimonyPerson(personObj)} deletePerson={(id) => this.deleteTestimonyPerson(id)} persons={this.state.testimonyPersons}/>
                         </div>
 
                         <div className="form-group">
                             <Badge color="primary">Vitima:</Badge>
-                            <Person addPerson={(personObj) => this.addVictimPerson(personObj)} persons={this.state.victimPersons}/>
+                            <Person addPerson={(personObj) => this.addVictimPerson(personObj)} deletePerson={(id) => this.deleteVictimPerson(id)} persons={this.state.victimPersons}/>
                         </div>
 
-                        <div className="form-group">
+                        {/*<div className="form-group">
                             <Badge color="primary">Objetos:</Badge>
 
-                        </div>
+                        </div>*/}
 
                     </ModalBody>
                     <ModalFooter>
