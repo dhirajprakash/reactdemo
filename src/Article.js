@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Button} from 'reactstrap';
 import uuid from 'uuid';
+import Helper from './Helper';
 
 class Article extends Component {
 
@@ -13,12 +14,12 @@ class Article extends Component {
     addArticle() {
         const articleObj = {
             id: uuid.v4(),
-            articleType: this.refs.articleType.value,
-            articleSubType: this.refs.articleSubType.value,
-            articleQuantity: this.refs.articleQuantity.value,
-            articleQtyUnit: this.refs.articleQtyUnit.value,
-            articleMake: this.refs.articleMake.value,
-            articleActionType: this.refs.articleActionType.value
+            articleType: Helper.replaceEmptyValue(this.refs.articleType.value),
+            articleSubType: Helper.replaceEmptyValue(this.refs.articleSubType.value),
+            articleQuantity: Helper.replaceEmptyValue(this.refs.articleQuantity.value),
+            articleQtyUnit: Helper.replaceEmptyValue(this.refs.articleQtyUnit.value),
+            articleMake: Helper.replaceEmptyValue(this.refs.articleMake.value),
+            articleActionType: Helper.replaceEmptyValue(this.refs.articleActionType.value)
         };
 
         this.props.addArticle(articleObj);

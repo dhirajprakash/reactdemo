@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Button} from 'reactstrap';
 import uuid from 'uuid';
+import Helper from './Helper';
 
 class Vehicle extends Component {
 
@@ -13,17 +14,17 @@ class Vehicle extends Component {
     addVehicle() {
         const vehicleObj = {
             id: uuid.v4(),
-            licensePlate: this.refs.licensePlate.value,
-            make: this.refs.make.value,
-            model: this.refs.model.value,
-            type: this.refs.type.value,
-            city: this.refs.vehicleCity.value,
-            vehicleState: this.refs.vehicleState.value,
-            chassisNumber: this.refs.chassisNumber.value,
-            registrationNumber: this.refs.registrationNumber.value,
-            manufactureYear: this.refs.manufactureYear.value,
-            modelYear: this.refs.modelYear.value,
-            vehicleColor: this.refs.vehicleColor.value,
+            licensePlate: Helper.replaceEmptyValue(this.refs.licensePlate.value),
+            make: Helper.replaceEmptyValue(this.refs.make.value),
+            model: Helper.replaceEmptyValue(this.refs.model.value),
+            type: Helper.replaceEmptyValue(this.refs.type.value),
+            city: Helper.replaceEmptyValue(this.refs.vehicleCity.value),
+            vehicleState: Helper.replaceEmptyValue(this.refs.vehicleState.value),
+            chassisNumber: Helper.replaceEmptyValue(this.refs.chassisNumber.value),
+            registrationNumber: Helper.replaceEmptyValue(this.refs.registrationNumber.value),
+            manufactureYear: Helper.replaceEmptyValue(this.refs.manufactureYear.value),
+            modelYear: Helper.replaceEmptyValue(this.refs.modelYear.value),
+            vehicleColor: Helper.replaceEmptyValue(this.refs.vehicleColor.value)
         };
 
         this.props.addVehicle(vehicleObj);

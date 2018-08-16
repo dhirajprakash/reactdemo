@@ -14,4 +14,8 @@ export default class Helper {
         return '0oaec0zyf1tVzyXDl0h7'; //DEV
         //return '0oae057tzmrQTeTtx0h7'; // PROD
     }
+
+    static replaceEmptyValue(value) {
+        return value != '' ? value : '-';
+    }
 }

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Button} from 'reactstrap';
 import uuid from 'uuid';
+import Helper from "./Helper";
 
 class Person extends Component {
 
@@ -10,8 +11,8 @@ class Person extends Component {
           name: this.refs.personName.value,
           age: this.refs.personAge.value,
           gender: this.refs.personGender.value,
-          address: this.refs.personAddress.value,
-          moreInfo: this.refs.personMoreInfo.value
+          address: Helper.replaceEmptyValue(this.refs.personAddress.value),
+          moreInfo: Helper.replaceEmptyValue(this.refs.personMoreInfo.value)
         };
 
         this.props.addPerson(personObj);
