@@ -230,18 +230,26 @@ class UploadFile extends Component {
                 reportId: this.refs.userInput_BoletimNo.value,
                 userInputDataMap: userInput
             };
+            const reportData = JSON.stringify(report);
+            this.toggle();
             const response = await fetch(Helper.getAPI() + '/reports/update', {
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     'Content-Type': 'application/json'
                 },
                 method: 'POST',
-                body: JSON.stringify(report)
+                body: reportData
             });
             const data = await response.json();
             console.log(data);
-            if (data && data.length > 0) {
-
+            if (data) {
+                const allReports = [];
+                allReports.push(data);
+                for (let i = 0; i < this.state.reports.length; i++) {
+                    if (this.state.reports[i].reportId != data.reportId) {
+                        allReports.push(this.state.reports[i]);
+                    }
+                }
                 this.props.notify('Success', 'success', 'Salvo com sucesso!');
             } else {
                 this.props.notify('Error', 'error', 'Não salvo!');
@@ -252,8 +260,6 @@ class UploadFile extends Component {
             this.props.notify('Error', 'error', 'Não salvo!');
             this.props.manageScreenLoader(false);
         }
-
-        this.toggle();
     }
 
     uploadStatusToggle() {
