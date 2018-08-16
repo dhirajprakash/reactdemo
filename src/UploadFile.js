@@ -29,6 +29,8 @@ import FaTimesCircle from 'react-icons/lib/fa/times-circle';
 import FaAngleUp from 'react-icons/lib/fa/angle-double-up';
 import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
 import Person from './Person';
+import Vehicle from './Vehicle';
+import Article from './Article';
 
 class UploadFile extends Component {
 
@@ -54,7 +56,9 @@ class UploadFile extends Component {
             historyMinimized: false,
             indiciadoPersons: [],
             testimonyPersons: [],
-            victimPersons: []
+            victimPersons: [],
+            vehicles: [],
+            articles: []
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -74,6 +78,10 @@ class UploadFile extends Component {
         this.deleteIndiciadoPerson = this.deleteIndiciadoPerson.bind(this);
         this.deleteTestimonyPerson = this.deleteTestimonyPerson.bind(this);
         this.deleteVictimPerson = this.deleteVictimPerson.bind(this);
+        this.addVehicle = this.addVehicle.bind(this);
+        this.deleteVehicle = this.deleteVehicle.bind(this);
+        this.addArticle = this.addArticle.bind(this);
+        this.deleteArticle = this.deleteArticle.bind(this);
     }
 
     async uploadFiles(files) {
@@ -194,11 +202,14 @@ class UploadFile extends Component {
             historyMinimized: false,
             indiciadoPersons: [],
             testimonyPersons: [],
-            victimPersons: []
+            victimPersons: [],
+            vehicles: [],
+            articles: []
         });
     }
 
     async submitUserInput() {
+        this.props.manageScreenLoader(true);
         try {
             this.props.manageScreenLoader(true);
 
@@ -210,6 +221,8 @@ class UploadFile extends Component {
                 Indiciado: this.state.indiciadoPersons,
                 Testemunha: this.state.testimonyPersons,
                 Vitima: this.state.victimPersons,
+                vehicles: this.state.vehicles,
+                articles: this.state.articles,
                 editedBy: this.props.userId,
                 uploader: this.refs.userInput_uploader.value
             }
@@ -226,20 +239,17 @@ class UploadFile extends Component {
                 body: JSON.stringify(report)
             });
             const data = await response.json();
-            //console.log(data);
+            console.log(data);
             if (data && data.length > 0) {
-                this.props.updateUser(data[0].userRole);
-                this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
-                //this.getMapCoordinates(data);
-                this.searchReports();
 
+                this.props.notify('Success', 'success', 'Salvo com sucesso!');
             } else {
-                this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
+                this.props.notify('Error', 'error', 'Não salvo!');
             }
             this.props.manageScreenLoader(false);
         } catch (err) {
-            this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
             console.log(err);
+            this.props.notify('Error', 'error', 'Não salvo!');
             this.props.manageScreenLoader(false);
         }
 
@@ -447,6 +457,27 @@ class UploadFile extends Component {
         }
     }
 
+    addVehicle(vehicleObj) {
+        const vehicleArray = this.state.vehicles;
+            vehicleArray.push(vehicleObj);
+            this.setState({vehicles: vehicleArray});
+    }
+    deleteVehicle(id) {
+        const vehicleArray = this.state.vehicles;
+        const vehicleUpd = vehicleArray.filter(v => v.id !== id);
+        this.setState({vehicles: vehicleUpd});
+    }
+
+    addArticle(articleObj) {
+        const articleArray = this.state.articles;
+        articleArray.push(articleObj);
+        this.setState({articles: articleArray});
+    }
+    deleteArticle(id) {
+        const articleArray = this.state.articles;
+        const articleUpd = articleArray.filter(v => v.id !== id);
+        this.setState({articles: articleUpd});
+    }
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -469,7 +500,10 @@ class UploadFile extends Component {
                 PeriodoCommunicacao: rpt.pdfDataMap.PeriodoCommunicacao,
                 PeriodoElaboracao: rpt.pdfDataMap.PeriodoElaboracao,
                 Rubrica: rpt.pdfDataMap.Rubrica,
-                TipoDeLocal: rpt.pdfDataMap.TipoDeLocal
+                TipoDeLocal: rpt.pdfDataMap.TipoDeLocal,
+                Indiciado: rpt.pdfDataMap.Indiciado,
+                Testemunha: rpt.pdfDataMap.Testemunha,
+                Vitima: rpt.pdfDataMap.Vitima
             });
         })
 
@@ -737,10 +771,15 @@ class UploadFile extends Component {
                             <Person addPerson={(personObj) => this.addVictimPerson(personObj)} deletePerson={(id) => this.deleteVictimPerson(id)} persons={this.state.victimPersons}/>
                         </div>
 
-                        {/*<div className="form-group">
-                            <Badge color="primary">Objetos:</Badge>
+                        <div className="form-group">
+                            <Badge color="primary">Veículo:</Badge>
+                            <Vehicle addVehicle={(vehicleObj) => this.addVehicle(vehicleObj)} deleteVehicle={(id) => this.deleteVehicle(id)} vehicles={this.state.vehicles}/>
+                        </div>
 
-                        </div>*/}
+                        <div className="form-group">
+                            <Badge color="primary">Objetos:</Badge>
+                            <Article addArticle={(articleObj) => this.addArticle(articleObj)} deleteArticle={(id) => this.deleteArticle(id)} articles={this.state.articles}/>
+                        </div>
 
                     </ModalBody>
                     <ModalFooter>

@@ -49,7 +49,7 @@ render() {
             <table className="mt-2">
                 <tbody>
                 <tr>
-                    <td>
+                    <td width="15%">
                         <div className="input-group-sm ml-1">
                             <label>Nome</label>
                             <input className="form-control" ref="personName" />
