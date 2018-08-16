@@ -163,7 +163,7 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-            //console.log(data);
+            // console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
@@ -196,16 +196,21 @@ class UploadFile extends Component {
     }
 
     toggle() {
-        this.setState({
-            modal: !this.state.modal,
-            reportEditMode: false,
-            historyMinimized: false,
-            indiciadoPersons: [],
-            testimonyPersons: [],
-            victimPersons: [],
-            vehicles: [],
-            articles: []
-        });
+        if (this.state.modal) {
+            this.setState({
+                modal: !this.state.modal,
+                reportEditMode: false,
+                historyMinimized: false,
+                indiciadoPersons: [],
+                testimonyPersons: [],
+                victimPersons: [],
+                vehicles: [],
+                articles: []
+            });
+    } else {
+            this.setState({
+                modal: true});
+        }
     }
 
     async submitUserInput() {
@@ -221,8 +226,8 @@ class UploadFile extends Component {
                 Indiciado: this.state.indiciadoPersons,
                 Testemunha: this.state.testimonyPersons,
                 Vitima: this.state.victimPersons,
-                vehicles: this.state.vehicles,
-                articles: this.state.articles,
+                Vehicles: this.state.vehicles,
+                Articles: this.state.articles,
                 editedBy: this.props.userId,
                 uploader: this.refs.userInput_uploader.value
             }
@@ -250,6 +255,7 @@ class UploadFile extends Component {
                         allReports.push(this.state.reports[i]);
                     }
                 }
+                this.setState({reports: allReports, searchResult: allReports});
                 this.props.notify('Success', 'success', 'Salvo com sucesso!');
             } else {
                 this.props.notify('Error', 'error', 'Não salvo!');
@@ -509,7 +515,9 @@ class UploadFile extends Component {
                 TipoDeLocal: rpt.pdfDataMap.TipoDeLocal,
                 Indiciado: rpt.pdfDataMap.Indiciado,
                 Testemunha: rpt.pdfDataMap.Testemunha,
-                Vitima: rpt.pdfDataMap.Vitima
+                Vitima: rpt.pdfDataMap.Vitima,
+                Vehicles: rpt.pdfDataMap.Vehicles,
+                Articles: rpt.pdfDataMap.Articles
             });
         })
 
@@ -634,7 +642,12 @@ class UploadFile extends Component {
                                             if (rowInfo) {
                                                 this.setState({
                                                     modalTitle: rowInfo.original.BoletimNo,
-                                                    modalBody: rowInfo.original
+                                                    modalBody: rowInfo.original,
+                                                    indiciadoPersons: rowInfo.original.Indiciado || [],
+                                                    testimonyPersons: rowInfo.original.Testemunha || [],
+                                                    victimPersons: rowInfo.original.Vitima || [],
+                                                    vehicles: rowInfo.original.Vehicles || [],
+                                                    articles: rowInfo.original.Articles || []
                                                 });
                                                 this.toggle();
                                             }

@@ -31,28 +31,32 @@ class Article extends Component {
 
     render() {
 
-        const articlesData = this.props.articles.map(p =>
-            <tr key={p.id}>
-                <td>
-                    {p.articleType}
-                </td>
-                <td>
-                    {p.articleSubType}
-                </td>
-                <td>
-                    {p.articleQuantity}&bsp;{p.articleQtyUnit}
-                </td>
-                <td>
-                    {p.articleMake}
-                </td>
-                <td>
-                    {p.articleActionType}
-                </td>
-                <td>
-                    <Button color="danger" size="sm" outline onClick={this.deleteArticle.bind(this, p.id)}>-</Button>
-                </td>
-            </tr>
-        );
+        let articlesData = [];
+        if(this.props.articles) {
+            articlesData = this.props.articles.map(p =>
+                <tr key={p.id}>
+                    <td>
+                        {p.articleType}
+                    </td>
+                    <td>
+                        {p.articleSubType}
+                    </td>
+                    <td>
+                        {p.articleQuantity}&nbsp;{p.articleQtyUnit}
+                    </td>
+                    <td>
+                        {p.articleMake}
+                    </td>
+                    <td>
+                        {p.articleActionType}
+                    </td>
+                    <td>
+                        <Button color="danger" size="sm" outline
+                                onClick={this.deleteArticle.bind(this, p.id)}>-</Button>
+                    </td>
+                </tr>
+            );
+        }
         return (
             <div className="bg-change-on-hover">
                 <table className="mt-2">
@@ -118,11 +122,11 @@ class Article extends Component {
                     <table className="table table-hover table-bordered">
                         <tbody>
                         <tr className="card-header-tabs bg-secondary">
-                            <th>Placa</th>
-                            <th>Marca/Modelo/Tipo</th>
-                            <th>Cor/Chassis/Renavam</th>
-                            <th>UF/Cidade</th>
-                            <th>Ano fabricação/Ano Modelo</th>
+                            <th>Tipo</th>
+                            <th>Subtipo</th>
+                            <th>QTDE Unidade</th>
+                            <th>Marca</th>
+                            <th>&nbsp;</th>
                             <th>&nbsp;</th>
                         </tr>
                         {articlesData}

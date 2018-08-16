@@ -36,28 +36,32 @@ class Vehicle extends Component {
 
     render() {
 
-        const vehiclesData = this.props.vehicles.map(p =>
-            <tr key={p.id}>
-                <td width="15%">
-                    {p.licensePlate}
-                </td>
-                <td width="15%">
-                    {p.make}/{p.model}/{p.type}
-                </td>
-                <td width="15%">
-                    {p.vehicleColor}/{p.chassisNumber}/{p.registrationNumber}
-                </td>
-                <td width="15%">
-                    {p.vehicleState}/{p.city}
-                </td>
-                <td width="15%">
-                    {p.manufactureYear}/{p.modelYear}
-                </td>
-                <td width="15%">
-                    <Button color="danger" size="sm" outline onClick={this.deleteVehicle.bind(this, p.id)}>-</Button>
-                </td>
-            </tr>
-        );
+        let vehiclesData = [];
+        if (this.props.vehicles) {
+             vehiclesData = this.props.vehicles.map(p =>
+                <tr key={p.id}>
+                    <td width="15%">
+                        {p.licensePlate}
+                    </td>
+                    <td width="15%">
+                        {p.make}/{p.model}/{p.type}
+                    </td>
+                    <td width="15%">
+                        {p.vehicleColor}/{p.chassisNumber}/{p.registrationNumber}
+                    </td>
+                    <td width="15%">
+                        {p.vehicleState}/{p.city}
+                    </td>
+                    <td width="15%">
+                        {p.manufactureYear}/{p.modelYear}
+                    </td>
+                    <td width="15%">
+                        <Button color="danger" size="sm" outline
+                                onClick={this.deleteVehicle.bind(this, p.id)}>-</Button>
+                    </td>
+                </tr>
+            );
+        }
         return (
             <div className="bg-change-on-hover">
                 <table className="mt-2">
