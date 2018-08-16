@@ -5,12 +5,6 @@ import Helper from './Helper';
 
 class Vehicle extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            popoverOpen: false
-        }
-    }
     addVehicle() {
         const vehicleObj = {
             id: uuid.v4(),

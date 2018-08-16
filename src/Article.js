@@ -5,12 +5,6 @@ import Helper from './Helper';
 
 class Article extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            popoverOpen: false
-        }
-    }
     addArticle() {
         const articleObj = {
             id: uuid.v4(),

@@ -31,6 +31,11 @@ import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
 import Person from './Person';
 import Vehicle from './Vehicle';
 import Article from './Article';
+import OtherDetail from './OtherDetail';
+import PersonView from './PersonView';
+import VehicleView from './VehicleView';
+import ArticleView from './ArticleView';
+import OtherDetailView from './OtherDetailView';
 
 class UploadFile extends Component {
 
@@ -58,7 +63,8 @@ class UploadFile extends Component {
             testimonyPersons: [],
             victimPersons: [],
             vehicles: [],
-            articles: []
+            articles: [],
+            otherDetails: []
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -82,6 +88,8 @@ class UploadFile extends Component {
         this.deleteVehicle = this.deleteVehicle.bind(this);
         this.addArticle = this.addArticle.bind(this);
         this.deleteArticle = this.deleteArticle.bind(this);
+        this.addOtherDetail = this.addOtherDetail.bind(this);
+        this.deleteOtherDetail = this.deleteOtherDetail.bind(this);
     }
 
     async uploadFiles(files) {
@@ -228,6 +236,7 @@ class UploadFile extends Component {
                 Vitima: this.state.victimPersons,
                 Vehicles: this.state.vehicles,
                 Articles: this.state.articles,
+                OtherDetails: this.state.otherDetails,
                 editedBy: this.props.userId,
                 uploader: this.refs.userInput_uploader.value
             }
@@ -490,6 +499,17 @@ class UploadFile extends Component {
         const articleUpd = articleArray.filter(v => v.id !== id);
         this.setState({articles: articleUpd});
     }
+
+    addOtherDetail(obj) {
+        const otherDetailsArray = this.state.otherDetails;
+        otherDetailsArray.push(obj);
+        this.setState({otherDetails: otherDetailsArray});
+    }
+    deleteOtherDetail(id) {
+        const otherDetailsArray = this.state.otherDetails;
+        const upd = otherDetailsArray.filter(v => v.id !== id);
+        this.setState({otherDetails: upd});
+    }
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -517,7 +537,8 @@ class UploadFile extends Component {
                 Testemunha: rpt.pdfDataMap.Testemunha,
                 Vitima: rpt.pdfDataMap.Vitima,
                 Vehicles: rpt.pdfDataMap.Vehicles,
-                Articles: rpt.pdfDataMap.Articles
+                Articles: rpt.pdfDataMap.Articles,
+                OtherDetails: rpt.pdfDataMap.OtherDetails
             });
         })
 
@@ -647,7 +668,8 @@ class UploadFile extends Component {
                                                     testimonyPersons: rowInfo.original.Testemunha || [],
                                                     victimPersons: rowInfo.original.Vitima || [],
                                                     vehicles: rowInfo.original.Vehicles || [],
-                                                    articles: rowInfo.original.Articles || []
+                                                    articles: rowInfo.original.Articles || [],
+                                                    otherDetails: rowInfo.original.OtherDetails || []
                                                 });
                                                 this.toggle();
                                             }
@@ -730,6 +752,36 @@ class UploadFile extends Component {
                             <Badge color="primary">Histórico:</Badge>
                             <p>{this.state.modalBody.History}</p>
                         </div>
+
+                        <div>
+                            <Badge color="primary">Indiciado:</Badge>
+                            <PersonView persons={this.state.indiciadoPersons}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Testemunha:</Badge>
+                            <PersonView persons={this.state.testimonyPersons}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Vitima:</Badge>
+                            <PersonView persons={this.state.victimPersons}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Veículo:</Badge>
+                            <VehicleView vehicles={this.state.vehicles}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Objetos:</Badge>
+                            <ArticleView articles={this.state.articles}/>
+                        </div>
+                        <div className="mt-2">
+                            <Badge color="primary">Mais:</Badge>
+                            <OtherDetailView otherDetails={this.state.otherDetails}/>
+                        </div>
+
                         <div>
                             <Badge color="primary">Enviado por:</Badge>
                             <p>{this.state.modalBody.uploader}</p>
@@ -798,6 +850,10 @@ class UploadFile extends Component {
                         <div className="form-group">
                             <Badge color="primary">Objetos:</Badge>
                             <Article addArticle={(articleObj) => this.addArticle(articleObj)} deleteArticle={(id) => this.deleteArticle(id)} articles={this.state.articles}/>
+                        </div>
+                        <div className="form-group">
+                            <Badge color="primary">Mais:</Badge>
+                            <OtherDetail addOtherDetail={(obj) => this.addOtherDetail(obj)} deleteOtherDetail={(id) => this.deleteOtherDetail(id)} otherDetails={this.state.otherDetails}/>
                         </div>
 
                     </ModalBody>
