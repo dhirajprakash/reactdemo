@@ -29,6 +29,13 @@ import FaTimesCircle from 'react-icons/lib/fa/times-circle';
 import FaAngleUp from 'react-icons/lib/fa/angle-double-up';
 import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
 import Person from './Person';
+import Vehicle from './Vehicle';
+import Article from './Article';
+import OtherDetail from './OtherDetail';
+import PersonView from './PersonView';
+import VehicleView from './VehicleView';
+import ArticleView from './ArticleView';
+import OtherDetailView from './OtherDetailView';
 
 class UploadFile extends Component {
 
@@ -54,7 +61,10 @@ class UploadFile extends Component {
             historyMinimized: false,
             indiciadoPersons: [],
             testimonyPersons: [],
-            victimPersons: []
+            victimPersons: [],
+            vehicles: [],
+            articles: [],
+            otherDetails: []
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -74,6 +84,12 @@ class UploadFile extends Component {
         this.deleteIndiciadoPerson = this.deleteIndiciadoPerson.bind(this);
         this.deleteTestimonyPerson = this.deleteTestimonyPerson.bind(this);
         this.deleteVictimPerson = this.deleteVictimPerson.bind(this);
+        this.addVehicle = this.addVehicle.bind(this);
+        this.deleteVehicle = this.deleteVehicle.bind(this);
+        this.addArticle = this.addArticle.bind(this);
+        this.deleteArticle = this.deleteArticle.bind(this);
+        this.addOtherDetail = this.addOtherDetail.bind(this);
+        this.deleteOtherDetail = this.deleteOtherDetail.bind(this);
     }
 
     async uploadFiles(files) {
@@ -155,7 +171,7 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-            //console.log(data);
+            // console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
@@ -188,17 +204,25 @@ class UploadFile extends Component {
     }
 
     toggle() {
-        this.setState({
-            modal: !this.state.modal,
-            reportEditMode: false,
-            historyMinimized: false,
-            indiciadoPersons: [],
-            testimonyPersons: [],
-            victimPersons: []
-        });
+        if (this.state.modal) {
+            this.setState({
+                modal: !this.state.modal,
+                reportEditMode: false,
+                historyMinimized: false,
+                indiciadoPersons: [],
+                testimonyPersons: [],
+                victimPersons: [],
+                vehicles: [],
+                articles: []
+            });
+    } else {
+            this.setState({
+                modal: true});
+        }
     }
 
     async submitUserInput() {
+        this.props.manageScreenLoader(true);
         try {
             this.props.manageScreenLoader(true);
 
@@ -210,6 +234,9 @@ class UploadFile extends Component {
                 Indiciado: this.state.indiciadoPersons,
                 Testemunha: this.state.testimonyPersons,
                 Vitima: this.state.victimPersons,
+                Vehicles: this.state.vehicles,
+                Articles: this.state.articles,
+                OtherDetails: this.state.otherDetails,
                 editedBy: this.props.userId,
                 uploader: this.refs.userInput_uploader.value
             }
@@ -217,33 +244,39 @@ class UploadFile extends Component {
                 reportId: this.refs.userInput_BoletimNo.value,
                 userInputDataMap: userInput
             };
+
+            const reportData = JSON.stringify(report);
+            this.toggle();
             const response = await fetch(Helper.getAPI() + 'reports/update', {
+
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     'Content-Type': 'application/json'
                 },
                 method: 'POST',
-                body: JSON.stringify(report)
+                body: reportData
             });
             const data = await response.json();
-            //console.log(data);
-            if (data && data.length > 0) {
-                this.props.updateUser(data[0].userRole);
-                this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
-                //this.getMapCoordinates(data);
-                this.searchReports();
-
+            console.log(data);
+            if (data) {
+                const allReports = [];
+                allReports.push(data);
+                for (let i = 0; i < this.state.reports.length; i++) {
+                    if (this.state.reports[i].reportId != data.reportId) {
+                        allReports.push(this.state.reports[i]);
+                    }
+                }
+                this.setState({reports: allReports, searchResult: allReports});
+                this.props.notify('Success', 'success', 'Salvo com sucesso!');
             } else {
-                this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
+                this.props.notify('Error', 'error', 'Não salvo!');
             }
             this.props.manageScreenLoader(false);
         } catch (err) {
-            this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
             console.log(err);
+            this.props.notify('Error', 'error', 'Não salvo!');
             this.props.manageScreenLoader(false);
         }
-
-        this.toggle();
     }
 
     uploadStatusToggle() {
@@ -447,6 +480,38 @@ class UploadFile extends Component {
         }
     }
 
+    addVehicle(vehicleObj) {
+        const vehicleArray = this.state.vehicles;
+            vehicleArray.push(vehicleObj);
+            this.setState({vehicles: vehicleArray});
+    }
+    deleteVehicle(id) {
+        const vehicleArray = this.state.vehicles;
+        const vehicleUpd = vehicleArray.filter(v => v.id !== id);
+        this.setState({vehicles: vehicleUpd});
+    }
+
+    addArticle(articleObj) {
+        const articleArray = this.state.articles;
+        articleArray.push(articleObj);
+        this.setState({articles: articleArray});
+    }
+    deleteArticle(id) {
+        const articleArray = this.state.articles;
+        const articleUpd = articleArray.filter(v => v.id !== id);
+        this.setState({articles: articleUpd});
+    }
+
+    addOtherDetail(obj) {
+        const otherDetailsArray = this.state.otherDetails;
+        otherDetailsArray.push(obj);
+        this.setState({otherDetails: otherDetailsArray});
+    }
+    deleteOtherDetail(id) {
+        const otherDetailsArray = this.state.otherDetails;
+        const upd = otherDetailsArray.filter(v => v.id !== id);
+        this.setState({otherDetails: upd});
+    }
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -469,7 +534,13 @@ class UploadFile extends Component {
                 PeriodoCommunicacao: rpt.pdfDataMap.PeriodoCommunicacao,
                 PeriodoElaboracao: rpt.pdfDataMap.PeriodoElaboracao,
                 Rubrica: rpt.pdfDataMap.Rubrica,
-                TipoDeLocal: rpt.pdfDataMap.TipoDeLocal
+                TipoDeLocal: rpt.pdfDataMap.TipoDeLocal,
+                Indiciado: rpt.pdfDataMap.Indiciado,
+                Testemunha: rpt.pdfDataMap.Testemunha,
+                Vitima: rpt.pdfDataMap.Vitima,
+                Vehicles: rpt.pdfDataMap.Vehicles,
+                Articles: rpt.pdfDataMap.Articles,
+                OtherDetails: rpt.pdfDataMap.OtherDetails
             });
         })
 
@@ -595,7 +666,13 @@ class UploadFile extends Component {
                                             if (rowInfo) {
                                                 this.setState({
                                                     modalTitle: rowInfo.original.BoletimNo,
-                                                    modalBody: rowInfo.original
+                                                    modalBody: rowInfo.original,
+                                                    indiciadoPersons: rowInfo.original.Indiciado || [],
+                                                    testimonyPersons: rowInfo.original.Testemunha || [],
+                                                    victimPersons: rowInfo.original.Vitima || [],
+                                                    vehicles: rowInfo.original.Vehicles || [],
+                                                    articles: rowInfo.original.Articles || [],
+                                                    otherDetails: rowInfo.original.OtherDetails || []
                                                 });
                                                 this.toggle();
                                             }
@@ -678,6 +755,36 @@ class UploadFile extends Component {
                             <Badge color="primary">Histórico:</Badge>
                             <p>{this.state.modalBody.History}</p>
                         </div>
+
+                        <div>
+                            <Badge color="primary">Indiciado:</Badge>
+                            <PersonView persons={this.state.indiciadoPersons}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Testemunha:</Badge>
+                            <PersonView persons={this.state.testimonyPersons}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Vitima:</Badge>
+                            <PersonView persons={this.state.victimPersons}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Veículo:</Badge>
+                            <VehicleView vehicles={this.state.vehicles}/>
+                        </div>
+
+                        <div className="mt-2">
+                            <Badge color="primary">Objetos:</Badge>
+                            <ArticleView articles={this.state.articles}/>
+                        </div>
+                        <div className="mt-2">
+                            <Badge color="primary">Mais:</Badge>
+                            <OtherDetailView otherDetails={this.state.otherDetails}/>
+                        </div>
+
                         <div>
                             <Badge color="primary">Enviado por:</Badge>
                             <p>{this.state.modalBody.uploader}</p>
@@ -738,10 +845,19 @@ class UploadFile extends Component {
                             <Person addPerson={(personObj) => this.addVictimPerson(personObj)} deletePerson={(id) => this.deleteVictimPerson(id)} persons={this.state.victimPersons}/>
                         </div>
 
-                        {/*<div className="form-group">
-                            <Badge color="primary">Objetos:</Badge>
+                        <div className="form-group">
+                            <Badge color="primary">Veículo:</Badge>
+                            <Vehicle addVehicle={(vehicleObj) => this.addVehicle(vehicleObj)} deleteVehicle={(id) => this.deleteVehicle(id)} vehicles={this.state.vehicles}/>
+                        </div>
 
-                        </div>*/}
+                        <div className="form-group">
+                            <Badge color="primary">Objetos:</Badge>
+                            <Article addArticle={(articleObj) => this.addArticle(articleObj)} deleteArticle={(id) => this.deleteArticle(id)} articles={this.state.articles}/>
+                        </div>
+                        <div className="form-group">
+                            <Badge color="primary">Mais:</Badge>
+                            <OtherDetail addOtherDetail={(obj) => this.addOtherDetail(obj)} deleteOtherDetail={(id) => this.deleteOtherDetail(id)} otherDetails={this.state.otherDetails}/>
+                        </div>
 
                     </ModalBody>
                     <ModalFooter>

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Button} from 'reactstrap';
 import uuid from 'uuid';
+import Helper from "./Helper";
 
 class Person extends Component {
 
@@ -10,8 +11,8 @@ class Person extends Component {
           name: this.refs.personName.value,
           age: this.refs.personAge.value,
           gender: this.refs.personGender.value,
-          address: this.refs.personAddress.value,
-          moreInfo: this.refs.personMoreInfo.value
+          address: Helper.replaceEmptyValue(this.refs.personAddress.value),
+          moreInfo: Helper.replaceEmptyValue(this.refs.personMoreInfo.value)
         };
 
         this.props.addPerson(personObj);
@@ -21,35 +22,37 @@ class Person extends Component {
     }
 
 render() {
-
-    const personsData = this.props.persons.map(p =>
-        <tr key={p.id}>
-            <td>
-                {p.name}
-            </td>
-            <td>
-                {p.age}
-            </td>
-            <td>
-                {p.gender}
-            </td>
-            <td>
-                {p.address}
-            </td>
-            <td>
-                {p.moreInfo}
-            </td>
-            <td>
-                <Button color="danger" size="sm" outline onClick={this.deletePerson.bind(this, p.id)}>-</Button>
-            </td>
-        </tr>
-    );
+    let personsData = [];
+    if (this.props.persons) {
+        personsData = this.props.persons.map(p =>
+            <tr key={p.id}>
+                <td>
+                    {p.name}
+                </td>
+                <td>
+                    {p.age}
+                </td>
+                <td>
+                    {p.gender}
+                </td>
+                <td>
+                    {p.address}
+                </td>
+                <td>
+                    {p.moreInfo}
+                </td>
+                <td>
+                    <Button color="danger" size="sm" outline onClick={this.deletePerson.bind(this, p.id)}>-</Button>
+                </td>
+            </tr>
+        );
+    }
     return (
         <div className="bg-change-on-hover">
             <table className="mt-2">
                 <tbody>
                 <tr>
-                    <td>
+                    <td width="15%">
                         <div className="input-group-sm ml-1">
                             <label>Nome</label>
                             <input className="form-control" ref="personName" />
