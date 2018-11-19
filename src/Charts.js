@@ -3,6 +3,7 @@ import './App.css';
 import {Doughnut} from 'react-chartjs-2';
 import {Bar} from 'react-chartjs-2';
 import {Badge} from 'reactstrap';
+import ReactToPrint from "react-to-print";
 
 class Charts extends Component {
 
@@ -12,6 +13,8 @@ class Charts extends Component {
             testValue: ''
         }
     }
+
+    
 
     render() {
 
@@ -212,13 +215,13 @@ class Charts extends Component {
 
         const dataTypeCrime = {
             labels: [
-                'FURTO',
                 'ROUBO',
+                'FURTO',
                 'OUTROS',
                 'N/A'
             ],
             datasets: [{
-                data: [furtoCount, rouboCount, otherCrimeCount,otherUndetectedCrimeCount],
+                data: [rouboCount, furtoCount, otherCrimeCount,otherUndetectedCrimeCount],
                 label: "Numero de BOs",
                 backgroundColor: [
                     '#FF6384',
@@ -298,8 +301,60 @@ class Charts extends Component {
                 ]
             }]
         };
+
+        const options = {
+            scales: {
+                 xAxes: [{
+                     stacked: true
+                 }],
+                 yAxes: [{
+                     stacked: true
+                 }]
+             }
+         }
+     
+         let dataStack ={ 
+           datasets:[{
+             label: 'ROUBO',
+               data :[rouboCount],
+               backgroundColor: [
+                '#FF6384'
+               ],
+               hoverBackgroundColor: [
+                '#FF6384'
+               ]
+             },
+             {
+               label: 'FURTO',
+               data:  [furtoCount]  ,
+               backgroundColor: [
+                '#36A2EB'
+                
+               ],
+               hoverBackgroundColor: [
+                   '#36A2EB' 
+               ] 
+             },
+             {
+               label: 'OUTROS',
+               data:  [otherCrimeCount]  ,
+               backgroundColor: [
+                '#FFCE56'
+               ],
+               hoverBackgroundColor: [
+                    '#FFCE56'
+               ] 
+             }],
+           labels:['Crimes Total']
+         }
+
         return (
-            <div className="mt-5">
+            <div className="mt-5" style={{overflowY: 'auto', maxHeight: '93vh'}}>
+            {/* <ReactToPrint
+                    trigger={() => <a href="#">Print!</a>}
+                    content={() => this.componentRef}
+                    /> */}
+                <button onClick={() => window.print()}>PRINT</button>
                 <div className="row mt-5">
                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
                         <Bar data={data} />
@@ -339,12 +394,12 @@ class Charts extends Component {
                         </div>
                     </div>
                   
-                     {/* <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
-                        <Bar data={correctSet} />
+                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
+                        <Bar data={dataStack} options={options}/>
                         <div style={{marginLeft: '18%'}} >
-                        <Badge className="ml-5 mt-5" color="primary">week2</Badge>
+                        <Badge className="ml-5 mt-5" color="primary">Crimes Total</Badge>
                         </div>
-                    </div> */}
+                    </div>
                 </div>
                 <div className="row mt-5">
                 {/* <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
@@ -362,6 +417,7 @@ class Charts extends Component {
                     </div> */}
                 </div>
             </div>
+           
         );
     }
 }
