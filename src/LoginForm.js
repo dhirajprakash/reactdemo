@@ -106,14 +106,14 @@ export default withAuth(class LoginForm extends Component {
                         </div>
                     </FormGroup>
                     <FormGroup row style={{display: this.state.authError ? '' : 'none'}}>
-                        <Label sm={4} className="text-white" align="center">Login failed!&nbsp;&nbsp; <a className="text-white action-link" onClick={this.forgotPassword.bind(this)}><u>Forgot Password?</u></a></Label>
+                        <Label sm={4} className="text-white" align="center">Falha em Login!&nbsp;&nbsp; <a className="text-white action-link" onClick={this.forgotPassword.bind(this)}><u> Esqueci Senha ?</u></a></Label>
                     </FormGroup>
                 </Form>
 
                 <div>
                     <Modal isOpen={this.state.passwordRequested} style={{marginTop: 150}} size="sm" centered="true">
                         <ModalBody className="font-common">
-                            Password will be sent to {this.state.username} shortly. Kindly refer your email.
+                            O senha vai ser mandado para  {this.state.username} agora. Favor entre em email . Se ainda nao recbeu senha , entre em contato com Administrador.
                         </ModalBody>
                         <ModalFooter>
                             <Button color="secondary" size="sm" onClick={() => this.setState({passwordRequested: false})}>OK</Button>
