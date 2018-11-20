@@ -69,3 +69,8 @@
 .bg-change-on-hover:hover {
     background-color: lightgray;
 }
+
+.action-link:hover {
+    color: darkorange !important;
+    cursor: pointer;
+}
