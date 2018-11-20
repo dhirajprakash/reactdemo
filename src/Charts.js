@@ -354,7 +354,7 @@ class Charts extends Component {
                     trigger={() => <a href="#">Print!</a>}
                     content={() => this.componentRef}
                     /> */}
-                <button onClick={() => window.print()}>PRINT</button>
+                <button style={{background: '#ff000f'}} onClick={() => window.print()}>PRINT</button>
                 <div className="row mt-5">
                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
                         <Bar data={data} />
