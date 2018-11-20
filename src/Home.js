@@ -84,7 +84,7 @@ class Home extends Component {
     }
 
     openBI() {
-        const win = window.open('https://quicksight.aws.amazon.com', '_blank');
+        const win = window.open('https://bi.prodataservices.com.br', '_blank');
         win.focus();
     }
 

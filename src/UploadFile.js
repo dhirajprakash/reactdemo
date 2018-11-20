@@ -244,9 +244,11 @@ class UploadFile extends Component {
                 reportId: this.refs.userInput_BoletimNo.value,
                 userInputDataMap: userInput
             };
+
             const reportData = JSON.stringify(report);
             this.toggle();
-            const response = await fetch(Helper.getAPI() + '/reports/update', {
+            const response = await fetch(Helper.getAPI() + 'reports/update', {
+
                 headers: {
                     Authorization: 'Bearer ' + await this.props.auth.getAccessToken(),
                     'Content-Type': 'application/json'
@@ -594,6 +596,7 @@ class UploadFile extends Component {
                     <td>
                         {f.reportS3Link}
                     </td>
+
                     <td style={{display: f.pdfDataMap.FAILED_KEYS.length > 0 ? '' : 'none'}}>
                         Falha ao extrair<b>{f.pdfDataMap.FAILED_KEYS.map(k => {return (k + '  ')})}</b>
                     </td>

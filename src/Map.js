@@ -4,7 +4,10 @@ import GoogleMapReact from 'google-map-react';
 import FaMapMarker from 'react-icons/lib/fa/map-marker';
 
 const MapComponent = ({ text }) => (
+    <div>
+        {/* {text} */}
     <FaMapMarker style={{color: '#FF5733'}} size={20}/>
+    </div>
 );
 
 class Map extends Component {
@@ -30,7 +33,10 @@ const mapComp = this.props.mapData.map(mp=>{
                     defaultZoom={13}
                 >
                     {mapComp}
+                   
+                    
                 </GoogleMapReact>
+                
             </div>
             );
     }

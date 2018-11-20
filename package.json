@@ -22,6 +22,7 @@
     "react-scripts": "1.1.0",
     "react-spinners": "^0.3.2",
     "react-table": "^6.7.6",
+    "react-to-print": "^2.0.0-alpha-4",
     "react-toastr": "^3.0.0",
     "react-transition-group": "^2.2.1",
     "reactstrap": "^5.0.0-beta",
