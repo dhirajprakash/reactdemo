@@ -356,6 +356,7 @@ class Charts extends Component {
                     /> */}
                 {/*<button onClick={() => window.print()}>PRINT</button>*/}
                 <div className="row mt-2">
+
                     <div className="col-5 bg-light ml-5" style={{height: '42vh'}}>
                         <Bar data={data} />
                         <div style={{marginLeft: '18%'}} >
