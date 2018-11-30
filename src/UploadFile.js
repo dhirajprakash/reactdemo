@@ -752,6 +752,19 @@ class UploadFile extends Component {
                         </div>
 
                         <div>
+                            <Badge color="primary">Natureza:</Badge>
+                            <p>{this.state.modalBody.Rubrica}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Estabelecimento:</Badge>
+                            <p>{this.state.modalBody.TipoDeLocal}</p>
+                        </div>
+                        <div>
+                            <Badge color="primary">Especie:</Badge>
+                            <p>{this.state.modalBody.Especie}</p>
+                        </div>
+
+                        <div>
                             <Badge color="primary">Histórico:</Badge>
                             <p>{this.state.modalBody.History}</p>
                         </div>
