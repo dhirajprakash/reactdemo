@@ -701,12 +701,12 @@ class UploadFile extends Component {
                         </div>
 
                         <div className="d-inline-block ml-3 mt-2 text-white">
-                            <input type="radio" name="searchType" value="AND" onClick={() => this.changeSearchType('AND')} defaultChecked={this.state.searchType === 'AND'}/> Having all&nbsp;&nbsp;
-                            <input type="radio" name="searchType" value="OR" onClick={() => this.changeSearchType('OR')} defaultChecked={this.state.searchType === 'OR'}/> Having anyone
+                            <input type="radio" name="searchType" value="AND" onClick={() => this.changeSearchType('AND')} defaultChecked={this.state.searchType === 'AND'}/> Todos &nbsp;&nbsp;
+                            <input type="radio" name="searchType" value="OR" onClick={() => this.changeSearchType('OR')} defaultChecked={this.state.searchType === 'OR'}/> Qualquer um
                         </div>
 
                         <Popover placement="top" isOpen={this.state.searchPopperOpen} target="searchPopper" toggle={this.toggleSearchPopper}>
-                            <PopoverBody>Enter comma separated search keywords and select applicable option to filter searched reports based on whether they include all or any one keyword.</PopoverBody>
+                            <PopoverBody>Digite palavras de busca separado por virgula e depois clique em butão de buscar.Dois opções disponíveis são para buscar com Todos os palavras escritas ou Buscar se qualquer um de palavra existe.</PopoverBody>
                         </Popover>
                         <Button className="ml-2" color="success" size="sm" onClick={this.searchReports} disabled={!this.state.searchEligible} title="search">
                             <FaSearch/>
