@@ -74,3 +74,6 @@
     color: darkorange !important;
     cursor: pointer;
 }
+.date-input {
+    width: 110px;
+}

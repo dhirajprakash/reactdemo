@@ -8,7 +8,9 @@ import {
     Badge,
     Button,
     Tooltip,
-    Collapse
+    Collapse,
+    Popover,
+    PopoverBody
 } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
@@ -28,6 +30,8 @@ import FaEdit from 'react-icons/lib/fa/edit';
 import FaTimesCircle from 'react-icons/lib/fa/times-circle';
 import FaAngleUp from 'react-icons/lib/fa/angle-double-up';
 import FaAngleDown from 'react-icons/lib/fa/angle-double-down';
+import FaInfoCircle from 'react-icons/lib/fa/info-circle';
+import FaSearch from 'react-icons/lib/fa/search';
 import Person from './Person';
 import Vehicle from './Vehicle';
 import Article from './Article';
@@ -52,7 +56,7 @@ class UploadFile extends Component {
             modalBody: {},
             noDataText: 'Carregando...',
             mapData: [],
-            searchText: '',
+            searchEligible: false,
             uploadFilesReturnedFromServer: [],
             userRole: '',
             reportEditMode: false,
@@ -64,7 +68,9 @@ class UploadFile extends Component {
             victimPersons: [],
             vehicles: [],
             articles: [],
-            otherDetails: []
+            otherDetails: [],
+            searchType: 'AND',
+            searchPopperOpen: false
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -90,6 +96,24 @@ class UploadFile extends Component {
         this.deleteArticle = this.deleteArticle.bind(this);
         this.addOtherDetail = this.addOtherDetail.bind(this);
         this.deleteOtherDetail = this.deleteOtherDetail.bind(this);
+        this.changeSearchType = this.changeSearchType.bind(this);
+        this.toggleSearchPopper = this.toggleSearchPopper.bind(this);
+        this.manageSearchButtons = this.manageSearchButtons.bind(this);
+    }
+
+    toggleSearchPopper() {
+        this.setState({
+            searchPopperOpen: !this.state.searchPopperOpen
+        });
+    }
+
+    manageSearchButtons() {
+        const searchText = this.refs.searchBox.value;
+        if (searchText != null && searchText.trim() !== '') {
+            this.setState({searchEligible: true});
+        } else {
+            this.setState({searchEligible: false});
+        }
     }
 
     async uploadFiles(files) {
@@ -196,7 +220,15 @@ class UploadFile extends Component {
                 id: uuid.v4(),
                 lat: parseFloat(rpt.pdfDataMap.Latitude),
                 lng: parseFloat(rpt.pdfDataMap.Longitude),
-                name: rpt.pdfDataMap.BoletimNo
+                name: rpt.pdfDataMap.BoletimNo,
+                Autoria: rpt.pdfDataMap.Autoria,
+                Rubrica: rpt.pdfDataMap.Rubrica,
+                OCCURENCIA_TIME: rpt.pdfDataMap.OCCURENCIA_TIME,
+                OCCURENCIA_DAY: rpt.pdfDataMap.OCCURENCIA_DAY,
+                TipoDeLocal: rpt.pdfDataMap.TipoDeLocal,
+                Especie: rpt.pdfDataMap.Especie,
+                Flagrante: rpt.pdfDataMap.Flagrante
+
             });
         });
         this.setState({mapData: coordinates});
@@ -286,6 +318,7 @@ class UploadFile extends Component {
     }
 
     searchReports() {
+        this.props.manageScreenLoader(true);
         const searchText = this.refs.searchBox.value;
         let isTextSearch = false;
         let isTextFound = false;
@@ -300,12 +333,46 @@ class UploadFile extends Component {
                 isTextFound = false;
                 if (isTextSearch) {
                     if (rpt.pdfDataMap && rpt.pdfDataMap.RAW_DATA) {
-                        if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
+
+                        const searchKeywords = searchText.split(',');
+                        if(this.state.searchType === 'AND') {
+                            for(let i = 0; i < searchKeywords.length; i++) {
+                                if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchKeywords[i].toUpperCase()) > -1) {
+                                    isTextFound = true;
+
+                                } else {
+                                    isTextFound = false;
+                                    break;
+                                }
+                            }
+                            if(isTextFound) {
+                                if (this.checkDateFilter(rpt) === 'Y') {
+                                    results.push(rpt);
+                                }
+                            }
+                        }
+                        else if(this.state.searchType === 'OR') {
+                            for(let i = 0; i < searchKeywords.length; i++) {
+                                if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchKeywords[i].toUpperCase()) > -1) {
+                                    isTextFound = true;
+                                    break;
+                                } else {
+                                    isTextFound = false;
+                                }
+                            }
+                            if(isTextFound) {
+                                if (this.checkDateFilter(rpt) === 'Y') {
+                                    results.push(rpt);
+                                }
+                            }
+                        }
+
+                        /*if (rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf(searchText.toUpperCase()) > -1) {
                             //console.log(this.checkDateFilter(rpt));
                             if (this.checkDateFilter(rpt) === 'Y') {
                                 results.push(rpt);
                             }
-                        }
+                        }*/
                     }
                 } else {
                     //console.log(this.checkDateFilter(rpt));
@@ -322,6 +389,7 @@ class UploadFile extends Component {
             this.getMapCoordinates(results);
             this.props.updateChartData(results);
         }
+        this.props.manageScreenLoader(false);
     }
 
     checkDateFilter(rpt) {
@@ -358,10 +426,9 @@ class UploadFile extends Component {
     }
 
     clearSearch() {
-        this.setState({searchText: ''});
-        this.searchReports();
-        // this.getMapCoordinates(this.state.reports);
         this.refs.searchBox.value = '';
+        this.setState({searchEligible: false});
+        this.searchReports();
     }
 
     async getReportLink(s3ReportName) {
@@ -512,6 +579,10 @@ class UploadFile extends Component {
         const upd = otherDetailsArray.filter(v => v.id !== id);
         this.setState({otherDetails: upd});
     }
+    changeSearchType(type) {
+        this.setState({searchType: type});
+    }
+
     render() {
 
         const data = this.state.searchResult.map(rpt => {
@@ -619,18 +690,35 @@ class UploadFile extends Component {
         return (
             <div style={{marginTop: '7vh', height: '93vh'}} className="font-common">
                 <div className="mt-3 mb-2 row">
-                    <div className="col-8 d-inline-block">
+                    <div className="col-10 d-inline-block">
                         <div className="react-datepicker-wrapper">
                             <div className="react-datepicker__input-container">
                                 <input type="text" name="nmSearch" id="idSearch" placeholder="pesquisa boletim..."
-                                       onChange={this.searchReports} ref="searchBox"
+                                        ref="searchBox" onChange={this.manageSearchButtons}
                                        className="react-datepicker-ignore-onclickoutside"/>
-                                {/*<button className="react-datepicker__close-icon" onClick={this.clearSearch}></button>*/}
+                                <FaInfoCircle onClick={this.toggleSearchPopper} id="searchPopper" style={{color: 'orange', cursor: 'pointer'}} />
                             </div>
                         </div>
-                        <span className="d-inline-block text-light ml-3">Ocorrência:</span>
+
+                        <div className="d-inline-block ml-3 mt-2 text-white">
+                            <input type="radio" name="searchType" value="AND" onClick={() => this.changeSearchType('AND')} defaultChecked={this.state.searchType === 'AND'}/> Having all&nbsp;&nbsp;
+                            <input type="radio" name="searchType" value="OR" onClick={() => this.changeSearchType('OR')} defaultChecked={this.state.searchType === 'OR'}/> Having anyone
+                        </div>
+
+                        <Popover placement="top" isOpen={this.state.searchPopperOpen} target="searchPopper" toggle={this.toggleSearchPopper}>
+                            <PopoverBody>Enter comma separated search keywords and select applicable option to filter searched reports based on whether they include all or any one keyword.</PopoverBody>
+                        </Popover>
+                        <Button className="ml-2" color="success" size="sm" onClick={this.searchReports} disabled={!this.state.searchEligible} title="search">
+                            <FaSearch/>
+                        </Button>
+                        <Button className="ml-2" color="warning" size="sm" onClick={this.clearSearch} disabled={!this.state.searchEligible} title="clear search">
+                            <FaTimesCircle/>
+                        </Button>
+
+                        <span className="d-inline-block text-light ml-5">Ocorrência:</span>
                         <div className="d-inline-block ml-1">
                             <DatePicker
+                                className="date-input"
                                 selected={this.startDate}
                                 selectsStart
                                 startDate={this.startDate}
@@ -642,6 +730,7 @@ class UploadFile extends Component {
                         </div>
                         <div className="d-inline-block ml-1 ">
                             <DatePicker
+                                className="date-input"
                                 selected={this.endDate}
                                 selectsEnd
                                 startDate={this.startDate}
@@ -651,9 +740,9 @@ class UploadFile extends Component {
                                 dateFormat="DD/MM/YYYY"
                             />
                         </div>
+
                     </div>
-                    {/*<div className="d-inline-block ml-1" style={{marginTop: -8}}><h2 onClick={this.applyFilter}>
-                        <FaPlayCircle style={{color: '#ffc107', cursor: 'pointer'}}/></h2></div>*/}
+
                 </div>
 
                 <div>
