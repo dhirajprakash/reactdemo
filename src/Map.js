@@ -3,10 +3,10 @@ import './App.css';
 import GoogleMapReact from 'google-map-react';
 import FaMapMarker from 'react-icons/lib/fa/map-marker';
 
-const MapComponent = ({ text }) => (
+const MapComponent = ({ iconColor }) => (
     <div>
-        {/* {text} */}
-    <FaMapMarker style={{color: '#FF5733'}} size={20}/>
+        {/* {iconColor} */}
+    <FaMapMarker style={{color: iconColor}} size={20}/>
     </div>
 );
 
@@ -17,11 +17,27 @@ class Map extends Component {
     }
     render() {
 const mapComp = this.props.mapData.map(mp=>{
+    let iconColor = '#FF5733';
+    if(mp.Rubrica != null){
+        if(mp.Rubrica.includes('urto')){
+            iconColor='#36A2EB';
+        }else if(mp.Rubrica.includes('oubo')){
+            iconColor='#FF6384';
+         }else{
+            iconColor='#FFCE56';
+         }
+        }else{
+            iconColor='#FF5733';
+        }
    return (
+    
        <MapComponent key={mp.id}
            lat={mp.lat}
            lng={mp.lng}
-           text={mp.name}
+           bo={mp.name}
+           iconColor={iconColor}
+           
+
        />
    );
 });
