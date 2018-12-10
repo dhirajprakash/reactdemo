@@ -10,7 +10,8 @@ import {
     Tooltip,
     Collapse,
     Popover,
-    PopoverBody
+    PopoverBody,
+    PopoverHeader
 } from 'reactstrap';
 import Dropzone from 'react-dropzone';
 import ReactTable from 'react-table';
@@ -70,7 +71,13 @@ class UploadFile extends Component {
             articles: [],
             otherDetails: [],
             searchType: 'AND',
-            searchPopperOpen: false
+            searchPopperOpen: false,
+            rubricaFilter: [],
+            tipoDeLocalFilter: [],
+            dayFilter: [],
+            timeFilter: [],
+            rubricaFilterOptions: [],
+            tipoDeLocalFilterOptions: []
         }
 
         this.startDate = moment().subtract(90, "days");
@@ -99,12 +106,109 @@ class UploadFile extends Component {
         this.changeSearchType = this.changeSearchType.bind(this);
         this.toggleSearchPopper = this.toggleSearchPopper.bind(this);
         this.manageSearchButtons = this.manageSearchButtons.bind(this);
+        this.toggleAdvFilter = this.toggleAdvFilter.bind(this);
+        this.modifyAdvFilter = this.modifyAdvFilter.bind(this);
+        this.modifyStateAdvFilter = this.modifyStateAdvFilter.bind(this);
+        this.applyAdvFilter = this.applyAdvFilter.bind(this);
+        this.resetAdvFilter = this.resetAdvFilter.bind(this);
+        this.searchReportForAttribute = this.searchReportForAttribute.bind(this);
     }
 
     toggleSearchPopper() {
         this.setState({
             searchPopperOpen: !this.state.searchPopperOpen
         });
+    }
+
+    toggleAdvFilter() {
+        this.setState({
+            advFilterPopperOpen: !this.state.advFilterPopperOpen, dayFilter: [], timeFilter: [], rubricaFilter: [], tipoDeLocalFilter: []
+        });
+    }
+
+    resetAdvFilter() {
+        this.setState({dayFilter: [], timeFilter: [], rubricaFilter: [], tipoDeLocalFilter: [], advFilterPopperOpen: false});
+        this.searchReports();
+    }
+
+    applyAdvFilter() {
+        if(this.state.rubricaFilter.length === 0 && this.state.tipoDeLocalFilter.length === 0 && this.state.dayFilter.length === 0 && this.state.timeFilter.length === 0) {
+            this.props.notify('Info', 'info', 'First select options to search!');
+        } else {
+            let results1 = [];
+            let results2 = [];
+            let results3 = [];
+            let results4 = [];
+            if(this.state.rubricaFilter.length > 0) {
+                results1 = this.searchReportForAttribute('Rubrica', this.state.rubricaFilter, this.state.searchResult);
+            }
+            if(this.state.tipoDeLocalFilter.length > 0) {
+                results2 = this.searchReportForAttribute('TipoDeLocal', this.state.tipoDeLocalFilter, this.state.searchResult);
+                results1.push(results2);
+            }
+            if(this.state.dayFilter.length > 0) {
+                results3 = this.searchReportForAttribute('OCCURENCIA_DAY', this.state.dayFilter, this.state.searchResult);
+                results1.push(results3);
+            }
+            if(this.state.timeFilter.length > 0) {
+                results4 = this.searchReportForAttribute('OCCURENCIA_TIME', this.state.timeFilter, this.state.searchResult);
+                results1.push(results4);
+            }
+
+            const results = [];
+            const resultIds = [];
+            results1.map(r => {
+                if(resultIds.indexOf(r.reportId) >=0) {
+
+                } else {
+                    results.push(r);
+                    resultIds.push(r.reportId);
+                }
+            });
+
+            this.setState({searchResult: results});
+            this.toggleAdvFilter();
+        }
+    }
+
+    searchReportForAttribute(attribute, valuesToSearch, arrayToSearch) {
+        const searchResult = [];
+        arrayToSearch.map(rpt => {
+            if(valuesToSearch.indexOf(rpt.pdfDataMap[attribute]) >= 0) {
+                searchResult.push(rpt);
+            }
+        });
+        return searchResult;
+    }
+
+    modifyAdvFilter(value, type) {
+
+        switch (type) {
+           case 'DAY':
+                this.modifyStateAdvFilter(this.state.dayFilter, value);
+                break;
+
+            case 'TIME':
+                this.modifyStateAdvFilter(this.state.timeFilter, value);
+                break;
+
+            case 'NATUREZA':
+                this.modifyStateAdvFilter(this.state.rubricaFilter, value);
+                break;
+
+            case 'TIPODELOCAL':
+                this.modifyStateAdvFilter(this.state.tipoDeLocalFilter, value);
+                break;
+        }
+    }
+
+    modifyStateAdvFilter(filterArray, value) {
+        const idx = filterArray.indexOf(value);
+        if (idx >= 0) {
+            filterArray.splice(idx, 1);
+        } else {
+            filterArray.push(value);
+        }
     }
 
     manageSearchButtons() {
@@ -195,12 +299,25 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-            // console.log(data);
+             //console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
                 //this.getMapCoordinates(data);
-                this.searchReports();
+
+                const tempOptions1 = [];
+                const tempOptions2 = [];
+
+                data.map(rpt => {
+                    if(rpt.pdfDataMap.Rubrica && tempOptions1.indexOf(rpt.pdfDataMap.Rubrica === -1)) {
+                        tempOptions1.push(rpt.pdfDataMap.Rubrica);
+                    }
+                    if(rpt.pdfDataMap.TipoDeLocal && tempOptions2.indexOf(rpt.pdfDataMap.TipoDeLocal === -1)) {
+                        tempOptions2.push(rpt.pdfDataMap.TipoDeLocal);
+                    }
+                });
+                this.setState({rubricaFilterOptions: tempOptions1, tipoDeLocalFilterOptions: tempOptions2});
+               this.searchReports();
 
             } else {
                 this.setState({noDataText: 'Nenhum arquivo encontrado!', tableLoading: false});
@@ -690,7 +807,7 @@ class UploadFile extends Component {
         return (
             <div style={{marginTop: '7vh', height: '93vh'}} className="font-common">
                 <div className="mt-3 mb-2 row">
-                    <div className="col-10 d-inline-block">
+                    <div className="col-11 d-inline-block">
                         <div className="react-datepicker-wrapper">
                             <div className="react-datepicker__input-container">
                                 <input type="text" name="nmSearch" id="idSearch" placeholder="pesquisa boletim..."
@@ -715,7 +832,7 @@ class UploadFile extends Component {
                             <FaTimesCircle/>
                         </Button>
 
-                        <span className="d-inline-block text-light ml-5">Ocorrência:</span>
+                        <span className="d-inline-block text-light ml-3">Ocorrência:</span>
                         <div className="d-inline-block ml-1">
                             <DatePicker
                                 className="date-input"
@@ -739,6 +856,92 @@ class UploadFile extends Component {
                                 isClearable={true}
                                 dateFormat="DD/MM/YYYY"
                             />
+                        </div>
+
+                        <div className="d-inline-block ml-1">
+                            <Button className="d-inline-block mr-auto" color="warning" outline id="advFiltersBtn" size="sm" onClick={this.toggleAdvFilter} title="advanced filters">
+                                Advanced Filters
+                            </Button>
+
+                            <Modal contentClassName="bg-dark text-white" isOpen={this.state.advFilterPopperOpen} toggle={this.toggleAdvFilter} size="lg" centered="true">
+                                <ModalHeader toggle={this.toggleAdvFilter}>
+                                    Advanced Filters
+                                </ModalHeader>
+                                <ModalBody>
+                                    <table border="1" width="100%">
+                                        <thead align="center" className="bg-secondary">
+                                        <tr>
+                                            <th width="25%">
+                                                Natureza
+                                            </th>
+                                            <th width="25%">
+                                                Estabelecimentos
+                                            </th>
+                                            <th width="25%">
+                                                Periodo
+                                            </th>
+                                            <th width="25%">
+                                                Dia
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <div style={{minHeight: 150, maxHeight: 150, overflowY: 'auto'}}>
+                                                    {this.state.rubricaFilterOptions.map((rf, idx) =>
+                                                        <div key={'rf-'+idx}>
+                                                        <input className="ml-1" type="checkbox" onChange={() => this.modifyAdvFilter(rf, 'NATUREZA')} />
+                                                            <span className="ml-1">{rf}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                            </td>
+                                            <td>
+                                                <div style={{minHeight: 150, maxHeight: 150, overflowY: 'auto'}}>
+                                                    {this.state.tipoDeLocalFilterOptions.map((tf, idx) =>
+                                                        <div key={'tf-'+idx}>
+                                                            <input className="ml-1" type="checkbox" onChange={() => this.modifyAdvFilter(tf, 'TIPODELOCAL')} />
+                                                            <span className="ml-1">{tf}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{minHeight: 150, maxHeight: 150, overflowY: 'auto'}}>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('TARDE', 'TIME')} />TARDE <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('NOITE', 'TIME')}/>NOITE <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('MADRUGADA', 'TIME')}/>MADRUGADA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('MANHA', 'TIME')}/>MANHA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('INCERTA', 'TIME')}/>INCERTA
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{minHeight: 150, maxHeight: 150, overflowY: 'auto'}}>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('SUNDAY', 'DAY')}/>DOMINGO <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('MONDAY', 'DAY')}/>SEGUNDA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('TUESDAY', 'DAY')}/>TERÇA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('WEDNESDAY', 'DAY')}/>QUARTA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('THURSDAY', 'DAY')}/>QUINTA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('FRIDAY', 'DAY')}/>SEXTA <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('SATURDAY', 'DAY')}/>SABADO
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="secondary" size="sm" title="reset" onClick={this.resetAdvFilter}>
+                                        Reset
+                                    </Button>
+                                    <Button color="warning ml-2" size="sm" title="search" onClick={this.applyAdvFilter}>
+                                        Search
+                                    </Button>
+                                </ModalFooter>
+                            </Modal>
+
                         </div>
 
                     </div>
