@@ -121,18 +121,25 @@ class UploadFile extends Component {
     }
 
     toggleAdvFilter() {
+        if(this.refs.advSearchLocalCrime) {
+            this.refs.advSearchLocalCrime.value = '';
+        }
         this.setState({
             advFilterPopperOpen: !this.state.advFilterPopperOpen, dayFilter: [], timeFilter: [], rubricaFilter: [], tipoDeLocalFilter: []
         });
     }
 
     resetAdvFilter() {
+        if(this.refs.advSearchLocalCrime) {
+            this.refs.advSearchLocalCrime.value = '';
+        }
         this.setState({dayFilter: [], timeFilter: [], rubricaFilter: [], tipoDeLocalFilter: [], advFilterPopperOpen: false});
-        this.searchReports();
+        this.clearSearch();
+        //this.searchReports();
     }
 
     applyAdvFilter() {
-        if(this.state.rubricaFilter.length === 0 && this.state.tipoDeLocalFilter.length === 0 && this.state.dayFilter.length === 0 && this.state.timeFilter.length === 0) {
+        if(this.state.rubricaFilter.length === 0 && this.state.tipoDeLocalFilter.length === 0 && this.state.dayFilter.length === 0 && this.state.timeFilter.length === 0 && this.refs.advSearchLocalCrime.value.trim() === '') {
             this.props.notify('Info', 'info', 'First select options to search!');
         } else {
             let results1 = [];
@@ -153,6 +160,13 @@ class UploadFile extends Component {
             if(this.state.timeFilter.length > 0) {
                 results4 = this.searchReportForAttribute('OCCURENCIA_TIME', this.state.timeFilter, this.state.searchResult);
                 results1.push(...results4);
+            }
+
+            if(this.refs.advSearchLocalCrime && this.refs.advSearchLocalCrime.value.trim() !== '') {
+                const localCrimeSearchTxtArray = [];
+                localCrimeSearchTxtArray.push(this.refs.advSearchLocalCrime.value.trim());
+                const results5 = this.searchReportForAttribute('LocalCrime', localCrimeSearchTxtArray, this.state.searchResult);
+                results1.push(...results5);
             }
 
             const results = [];
@@ -181,7 +195,7 @@ class UploadFile extends Component {
             }*/
             for(let k=0;k<valuesToSearch.length;k++)
             {
-                if(rpt.pdfDataMap[attribute].indexOf(valuesToSearch[k]) >= 0) {
+                if(rpt.pdfDataMap[attribute].toUpperCase().indexOf(valuesToSearch[k].toUpperCase()) >= 0) {
                     searchResult.push(rpt);
                     break;
                 }
@@ -191,7 +205,6 @@ class UploadFile extends Component {
     }
 
     modifyAdvFilter(value, type) {
-
         switch (type) {
            case 'DAY':
                 this.modifyStateAdvFilter(this.state.dayFilter, value);
@@ -308,7 +321,7 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-             console.log(data);
+            // console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
@@ -819,7 +832,7 @@ class UploadFile extends Component {
                     <div className="col-11 d-inline-block">
                         <div className="react-datepicker-wrapper">
                             <div className="react-datepicker__input-container">
-                                <input type="text" name="nmSearch" id="idSearch" placeholder="pesquisa boletim..."
+                                <input type="text" name="nmSearch" id="idSearch" placeholder="enter comma separated keywords for wild card search..."
                                         ref="searchBox" onChange={this.manageSearchButtons}
                                        className="react-datepicker-ignore-onclickoutside"/>
                                 <FaInfoCircle onClick={this.toggleSearchPopper} id="searchPopper" style={{color: 'orange', cursor: 'pointer'}} />
@@ -834,10 +847,13 @@ class UploadFile extends Component {
                         <Popover placement="top" isOpen={this.state.searchPopperOpen} target="searchPopper" toggle={this.toggleSearchPopper}>
                             <PopoverBody>Digite palavras de busca separado por virgula e depois clique em butão de buscar.Dois opções disponíveis são para buscar com Todos os palavras escritas ou Buscar se qualquer um de palavra existe.</PopoverBody>
                         </Popover>
-                        <Button className="ml-2" color="success" size="sm" onClick={this.searchReports} disabled={!this.state.searchEligible} title="search">
+                        <Button className="ml-2" color="success" outline size="sm" onClick={this.searchReports} disabled={!this.state.searchEligible} title="search">
                             <FaSearch/>
                         </Button>
-                        <Button className="ml-2" color="warning" size="sm" onClick={this.clearSearch} disabled={!this.state.searchEligible} title="clear search">
+                        <Button className="ml-2" color="warning" outline id="advFiltersBtn" size="sm" onClick={this.toggleAdvFilter} title="advanced filters">
+                            Advanced Filters
+                        </Button>
+                        <Button className="ml-2" color="danger" outline size="sm" onClick={this.resetAdvFilter} title="clear search">
                             <FaTimesCircle/>
                         </Button>
 
@@ -867,16 +883,16 @@ class UploadFile extends Component {
                             />
                         </div>
 
-                        <div className="d-inline-block ml-1">
-                            <Button className="d-inline-block mr-auto" color="warning" outline id="advFiltersBtn" size="sm" onClick={this.toggleAdvFilter} title="advanced filters">
-                                Advanced Filters
-                            </Button>
+                        <div>
 
                             <Modal contentClassName="bg-dark text-white" isOpen={this.state.advFilterPopperOpen} toggle={this.toggleAdvFilter} size="lg" centered="true">
                                 <ModalHeader toggle={this.toggleAdvFilter}>
                                     Advanced Filters
                                 </ModalHeader>
                                 <ModalBody>
+                                    <div className="bg-dark mb-2">
+                                        <input type="text" placeholder="enter local crime" ref="advSearchLocalCrime" />
+                                    </div>
                                     <table border="1" width="100%">
                                         <thead align="center" className="bg-secondary">
                                         <tr>
@@ -942,9 +958,9 @@ class UploadFile extends Component {
                                     </table>
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button color="secondary" size="sm" title="reset" onClick={this.resetAdvFilter}>
+                                    {/*<Button color="secondary" size="sm" title="reset" onClick={this.resetAdvFilter}>
                                         Reset
-                                    </Button>
+                                    </Button>*/}
                                     <Button color="warning ml-2" size="sm" title="search" onClick={this.applyAdvFilter}>
                                         Search
                                     </Button>
