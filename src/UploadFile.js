@@ -144,15 +144,15 @@ class UploadFile extends Component {
             }
             if(this.state.tipoDeLocalFilter.length > 0) {
                 results2 = this.searchReportForAttribute('TipoDeLocal', this.state.tipoDeLocalFilter, this.state.searchResult);
-                results1.push(results2);
+                results1.push(...results2);
             }
             if(this.state.dayFilter.length > 0) {
                 results3 = this.searchReportForAttribute('OCCURENCIA_DAY', this.state.dayFilter, this.state.searchResult);
-                results1.push(results3);
+                results1.push(...results3);
             }
             if(this.state.timeFilter.length > 0) {
                 results4 = this.searchReportForAttribute('OCCURENCIA_TIME', this.state.timeFilter, this.state.searchResult);
-                results1.push(results4);
+                results1.push(...results4);
             }
 
             const results = [];
@@ -299,7 +299,7 @@ class UploadFile extends Component {
                 }
             });
             const data = await response.json();
-             //console.log(data);
+             console.log(data);
             if (data && data.length > 0) {
                 this.props.updateUser(data[0].userRole);
                 this.setState({reports: data, searchResult: data, tableLoading: false, userRole: data[0].userRole});
