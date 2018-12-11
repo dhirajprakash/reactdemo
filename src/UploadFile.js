@@ -167,6 +167,8 @@ class UploadFile extends Component {
             });
 
             this.setState({searchResult: results});
+            this.getMapCoordinates(results);
+            this.props.updateChartData(results);
             this.toggleAdvFilter();
         }
     }
