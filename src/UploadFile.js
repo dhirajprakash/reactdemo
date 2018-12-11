@@ -176,8 +176,15 @@ class UploadFile extends Component {
     searchReportForAttribute(attribute, valuesToSearch, arrayToSearch) {
         const searchResult = [];
         arrayToSearch.map(rpt => {
-            if(valuesToSearch.indexOf(rpt.pdfDataMap[attribute]) >= 0) {
+            /*if(valuesToSearch.indexOf(rpt.pdfDataMap[attribute]) >= 0) {
                 searchResult.push(rpt);
+            }*/
+            for(let k=0;k<valuesToSearch.length;k++)
+            {
+                if(rpt.pdfDataMap[attribute].indexOf(valuesToSearch[k]) >= 0) {
+                    searchResult.push(rpt);
+                    break;
+                }
             }
         });
         return searchResult;
