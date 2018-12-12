@@ -29,8 +29,8 @@ class MapComponent extends Component {
         return (
             <div>
                 <div style={{display: this.props.vehiclePresent ? '' : 'none'}}>
-                    <FaCab onClick={this.toggleCarInfoPopper} id="id_CarMarker" style={{color: this.props.iconColor, display: this.props.vehiclePresent ? '' : 'none'}} size={20}/>
-                    <Popover isOpen={this.state.carInfoPopperOpen} className="bg-dark text-white" placement="top" toggle={this.toggleCarInfoPopper} target="id_CarMarker">
+                    <FaCab onClick={this.toggleCarInfoPopper} id={'car_'+this.props.key} style={{color: this.props.iconColor, display: this.props.vehiclePresent ? '' : 'none'}} size={20}/>
+                    <Popover isOpen={this.state.carInfoPopperOpen} className="bg-dark text-white" placement="top" toggle={this.toggleCarInfoPopper} target={'car_'+this.props.key}>
                         <PopoverBody className="text-white">
                             <div>
                                 <table>
@@ -58,8 +58,8 @@ class MapComponent extends Component {
                     </Popover>
                 </div>
                 <div style={{display: this.props.vehiclePresent ? 'none' : ''}}>
-                    <FaMapMarker onClick={this.toggleInfoPopper} id="id_MapMarker" style={{color: this.props.iconColor, display: this.props.vehiclePresent ? 'none' : ''}} size={20}/>
-                    <Popover isOpen={this.state.infoPopperOpen} className="bg-dark" placement="top" toggle={this.toggleInfoPopper} target="id_MapMarker">
+                    <FaMapMarker onClick={this.toggleInfoPopper} id={'marker_'+this.props.key} style={{color: this.props.iconColor, display: this.props.vehiclePresent ? 'none' : ''}} size={20}/>
+                    <Popover isOpen={this.state.infoPopperOpen} className="bg-dark" placement="top" toggle={this.toggleInfoPopper} target={'marker_'+this.props.key}>
                         <PopoverBody className="text-white">
                             <div>
                                 <table>
