@@ -25,7 +25,7 @@ class MapComponent extends Component {
             <div>
                 <div style={{display: this.props.vehiclePresent ? '' : 'none'}}>
                     <FaCab id="id_CarMarker" style={{color: this.props.iconColor, display: this.props.vehiclePresent ? '' : 'none'}} size={20}/>
-                    <Popover className="bg-dark text-white" placement="top" toggle={this.toggleInfoPopper} target="id_MapMarker">
+                    <Popover isOpen={this.state.infoPopperOpen} className="bg-dark text-white" placement="top" toggle={this.toggleInfoPopper} target="id_MapMarker">
                         <PopoverBody>
                             <div>
                                 {this.props.reportId}
