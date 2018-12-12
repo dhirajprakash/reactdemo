@@ -853,7 +853,7 @@ class UploadFile extends Component {
                             <FaSearch/>
                         </Button>
                         <Button className="ml-2" color="warning" outline id="advFiltersBtn" size="sm" onClick={this.toggleAdvFilter} title="advanced filters">
-                            Advanced Filters
+                            Filtro Avançado
                         </Button>
                         <Button className="ml-2" color="danger" outline size="sm" onClick={this.resetAdvFilter} title="clear search">
                             <FaTimesCircle/>
@@ -889,11 +889,11 @@ class UploadFile extends Component {
 
                             <Modal contentClassName="bg-dark text-white" isOpen={this.state.advFilterPopperOpen} toggle={this.toggleAdvFilter} size="lg" centered="true">
                                 <ModalHeader toggle={this.toggleAdvFilter}>
-                                    Advanced Filters
+                                    Filtro Avançado
                                 </ModalHeader>
                                 <ModalBody>
                                     <div className="bg-dark mb-2">
-                                        <input type="text" placeholder="enter local crime" ref="advSearchLocalCrime" />
+                                        <input type="text" placeholder="local de crime" ref="advSearchLocalCrime" />
                                     </div>
                                     <table border="1" width="100%">
                                         <thead align="center" className="bg-secondary">
@@ -967,7 +967,7 @@ class UploadFile extends Component {
                                         Reset
                                     </Button>*/}
                                     <Button color="warning ml-2" size="sm" title="search" onClick={this.applyAdvFilter}>
-                                        Search
+                                        Busca
                                     </Button>
                                 </ModalFooter>
                             </Modal>
