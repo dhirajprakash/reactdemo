@@ -8,14 +8,19 @@ class MapComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            infoPopperOpen: false
+            infoPopperOpen: false,
+            carInfoPopperOpen: false
         }
 
         this.toggleInfoPopper = this.toggleInfoPopper.bind(this);
+        this.toggleCarInfoPopper = this.toggleCarInfoPopper.bind(this);
     }
 
     toggleInfoPopper() {
         this.setState({infoPopperOpen: !this.state.infoPopperOpen});
+    }
+    toggleCarInfoPopper() {
+        this.setState({carInfoPopperOpen: !this.state.carInfoPopperOpen});
     }
 
     render() {
@@ -24,11 +29,30 @@ class MapComponent extends Component {
         return (
             <div>
                 <div style={{display: this.props.vehiclePresent ? '' : 'none'}}>
-                    <FaCab onClick={this.toggleInfoPopper} id="id_CarMarker" style={{color: this.props.iconColor, display: this.props.vehiclePresent ? '' : 'none'}} size={20}/>
-                    <Popover isOpen={this.state.infoPopperOpen} className="bg-dark text-white" placement="top" toggle={this.toggleInfoPopper} target="id_CarMarker">
-                        <PopoverBody>
+                    <FaCab onClick={this.toggleCarInfoPopper} id="id_CarMarker" style={{color: this.props.iconColor, display: this.props.vehiclePresent ? '' : 'none'}} size={20}/>
+                    <Popover isOpen={this.state.carInfoPopperOpen} className="bg-dark text-white" placement="top" toggle={this.toggleCarInfoPopper} target="id_CarMarker">
+                        <PopoverBody className="text-white">
                             <div>
-                                {this.props.reportId}
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            Boletim No.
+                                        </td>
+                                        <td className="text-warning">
+                                            {this.props.reportId}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Ocorrência
+                                        </td>
+                                        <td className="text-warning">
+                                            {this.props.occurencia}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </PopoverBody>
                     </Popover>
