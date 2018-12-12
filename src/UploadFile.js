@@ -366,8 +366,10 @@ class UploadFile extends Component {
                 OCCURENCIA_DAY: rpt.pdfDataMap.OCCURENCIA_DAY,
                 TipoDeLocal: rpt.pdfDataMap.TipoDeLocal,
                 Especie: rpt.pdfDataMap.Especie,
-                Flagrante: rpt.pdfDataMap.Flagrante
-
+                Flagrante: rpt.pdfDataMap.Flagrante,
+                vehiclePresent: rpt.pdfDataMap.RAW_DATA.toUpperCase().indexOf('PLACA') > -1,
+                reportId: rpt.reportId,
+                occurencia: rpt.pdfDataMap.Data
             });
         });
         this.setState({mapData: coordinates});

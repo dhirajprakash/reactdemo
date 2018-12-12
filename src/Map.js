@@ -1,14 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import GoogleMapReact from 'google-map-react';
-import FaMapMarker from 'react-icons/lib/fa/map-marker';
-
-const MapComponent = (props) => (
-    <div>
-        {/* {iconColor} */}
-    <FaMapMarker style={{color: props.iconColor}} onClick={props.clicked} size={20}/>
-    </div>
-);
+import MapComponent from './MapComponent';
 
 class Map extends Component {
 
@@ -16,14 +9,8 @@ class Map extends Component {
         super(props);
     }
 
-      
-    mapClickHandler = (name) => {
-        console.log(name);
-        
-    }
-
     render() {
-const mapComp = this.props.mapData.map(mp=>{
+    const mapComp = this.props.mapData.map(mp=>{
     let iconColor = '#FF5733';
     let iconType = 0;
     if(mp.Rubrica != null){
@@ -54,11 +41,11 @@ const mapComp = this.props.mapData.map(mp=>{
            tipolocal={mp.TipoDeLocal}
            especie={mp.Especie}
            flagrante={mp.Flagrante}
-           clicked={this.mapClickHandler.bind(this,mp.name)}
            iconColor={iconColor}
            iconType={iconType}
-           
-
+           vehiclePresent={mp.vehiclePresent}
+           reportId={mp.reportId}
+           occurencia={mp.occurencia}
        />
    );
 });
