@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { GoogleMapReact,InfoWindow} from 'google-map-react';
+import GoogleMapReact from 'google-map-react';
 import FaMapMarker from 'react-icons/lib/fa/map-marker';
 
 const MapComponent = (props) => (
@@ -32,7 +32,7 @@ const mapComp = this.props.mapData.map(mp=>{
             iconType=1;
         }else if(mp.Rubrica.includes('oubo')){
             iconColor='#FF6384';
-            iconType=2
+            iconType=2;
          }else{
             iconColor='#FFCE56';
             iconType=3;
