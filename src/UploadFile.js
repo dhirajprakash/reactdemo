@@ -914,12 +914,15 @@ class UploadFile extends Component {
                                         <tr>
                                             <td>
                                                 <div style={{minHeight: 150, maxHeight: 150, overflowY: 'auto'}}>
-                                                    {this.state.rubricaFilterOptions.map((rf, idx) =>
+                                                    {/* {this.state.rubricaFilterOptions.map((rf, idx) =>
                                                         <div key={'rf-'+idx}>
                                                         <input className="ml-1" type="checkbox" onChange={() => this.modifyAdvFilter(rf, 'NATUREZA')} />
                                                             <span className="ml-1">{rf}</span>
                                                         </div>
-                                                    )}
+                                                    )} */}
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('oubo', 'NATUREZA')} />Roubo <br/>
+                                                    <input className="ml-1 mr-1" type="checkbox" onChange={() => this.modifyAdvFilter('urto', 'NATUREZA')}/>Furto <br/>
+                                                   
                                                 </div>
 
                                             </td>
