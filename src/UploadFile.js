@@ -354,9 +354,10 @@ class UploadFile extends Component {
 
     getMapCoordinates(data) {
         const coordinates = [];
+        let index = 0;
         data.map(rpt => {
             coordinates.push({
-                id: uuid.v4(),
+                id: index++,
                 lat: parseFloat(rpt.pdfDataMap.Latitude),
                 lng: parseFloat(rpt.pdfDataMap.Longitude),
                 name: rpt.pdfDataMap.BoletimNo,
