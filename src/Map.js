@@ -34,6 +34,7 @@ class Map extends Component {
    return (
     
        <MapComponent key={mp.id}
+           markerId={mp.id}
            lat={mp.lat}
            lng={mp.lng}
            bo={mp.name}
