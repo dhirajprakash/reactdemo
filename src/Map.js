@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
 import GoogleMapReact from 'google-map-react';
+
 import MapComponent from './MapComponent';
+
 
 class Map extends Component {
 
     constructor(props) {
         super(props);
     }
+
 
     render() {
     const mapComp = this.props.mapData.map(mp=>{
@@ -46,6 +49,7 @@ class Map extends Component {
            vehiclePresent={mp.vehiclePresent}
            reportId={mp.reportId}
            occurencia={mp.occurencia}
+
        />
    );
 });
